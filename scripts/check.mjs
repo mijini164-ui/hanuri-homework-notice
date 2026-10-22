@@ -8,7 +8,7 @@ const PAGES = {
   "homework.html": ["fileRoster", "fileHw", "list", "savePdf", "savePng", "saveStatus", "catalog", "viewer"],
   "feedback.html": ["stage", "report", "student", "pick", "checks", "gen", "alt", "text", "png", "preview"],
 };
-const FORMS = ["수업계획서 만들기 회원정리.xlsx", "수업계획서 만들기 회원정리 요일팀으로 작성.xlsx", "단계별 숙제.xlsx", "단계별 숙제 만들기 파일.xlsx"];
+const FORMS = ["수업계획서 만들기 회원정리.xlsx", "수업계획서 만들기 회원정리 요일팀으로 작성.xlsx", "단계별 숙제.xlsx", "단계별 숙제 만들기 파일.xlsx", "한우리_수업도우미_사용안내.pptx"];
 const errors = [];
 
 for (const [file, ids] of Object.entries(PAGES)) {
