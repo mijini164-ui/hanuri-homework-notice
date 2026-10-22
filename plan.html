@@ -1,0 +1,597 @@
+<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>달력 수업계획서 만들기</title><script>try{if(!window.claude&&parent!==window&&parent.claude)window.claude=parent.claude}catch(e){}
+/* GitHub Pages처럼 Claude 밖에서 열면 브라우저 기본 다운로드로 저장해요 */
+if(!window.claude){var __bd={save:async function(o){var b=o.data instanceof Blob?o.data:new Blob([o.data]);var u=URL.createObjectURL(b),a=document.createElement("a");a.href=u;a.download=o.filename;document.body.appendChild(a);a.click();a.remove();setTimeout(function(){URL.revokeObjectURL(u)},60000);return {status:"saved"}}};window.claude={use:async function(n){return n==="downloads"?__bd:null}};}</script></head><body>
+
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap">
+<style>
+/* Layout: one narrow working column — upload step on top, one panel per class below, each showing the finished image */
+:root{
+  --bg:#eef1f6; --surface:#ffffff; --fg:#1f2a4a; --muted:#5d6886; --line:#d9dfea;
+  --accent:#1f2a4a; --accent-fg:#ffffff; --soft:#e3eaf5; --link:#2b5bb8;
+  --warn-bg:#fff3e6; --warn-fg:#9a4a10;
+  --font:"Noto Sans KR","Apple SD Gothic Neo","Malgun Gothic",sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#12161f; --surface:#1b2130; --fg:#e7ebf4; --muted:#9aa5bf; --line:#2c3447;
+  --accent:#8fb0ec; --accent-fg:#12161f; --soft:#243049; --link:#9cbcf5;
+  --warn-bg:#3a2a18; --warn-fg:#f3c08e; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#12161f; --surface:#1b2130; --fg:#e7ebf4; --muted:#9aa5bf; --line:#2c3447;
+  --accent:#8fb0ec; --accent-fg:#12161f; --soft:#243049; --link:#9cbcf5;
+  --warn-bg:#3a2a18; --warn-fg:#f3c08e; color-scheme:dark}
+body{background:var(--bg);color:var(--fg);font-family:var(--font);font-size:15px;line-height:1.55;word-break:keep-all}
+.page{max-width:760px;margin:0 auto;padding-block:28px 64px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:flex;flex-direction:column;gap:20px}
+header h1{font-size:28px;font-weight:900;letter-spacing:-.5px;text-wrap:balance;margin:0}
+header p{margin:6px 0 0;color:var(--muted)}
+.month{display:inline-block;margin-top:10px;background:var(--soft);color:var(--fg);border-radius:999px;padding:4px 12px;font-size:13px;font-weight:700}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:20px;display:flex;flex-direction:column;gap:14px;min-width:0}
+.step{font-size:12px;font-weight:700;letter-spacing:.06em;color:var(--muted)}
+.panel h2{font-size:19px;margin:0}
+.drop{border:2px dashed var(--line);border-radius:14px;padding:26px 16px;text-align:center;cursor:pointer;transition:border-color .15s,background .15s}
+.drop:hover,.drop.over{border-color:var(--accent);background:var(--soft)}
+.drop strong{display:block;font-size:16px}
+.drop span{color:var(--muted);font-size:13px}
+.drop input{position:absolute;width:1px;height:1px;opacity:0}
+.hint{font-size:13px;color:var(--muted);margin:0}
+.hint code{font-family:inherit;background:var(--soft);border-radius:6px;padding:1px 6px;color:var(--fg)}
+.status{font-size:14px;color:var(--muted);min-height:1em}
+.bar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between}
+button{font:inherit;font-weight:700;border-radius:10px;padding:9px 16px;cursor:pointer;border:1px solid var(--accent);background:var(--accent);color:var(--accent-fg)}
+button.ghost{background:transparent;color:var(--fg);border-color:var(--line)}
+button:disabled{opacity:.5;cursor:default}
+button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-visible,.drop:focus-within{outline:3px solid var(--link);outline-offset:2px}
+.cls-head{display:flex;flex-wrap:wrap;gap:8px;align-items:baseline;justify-content:space-between}
+.cls-head h3{margin:0;font-size:17px}
+.tag{font-size:12px;font-weight:700;border-radius:999px;padding:2px 10px;background:var(--soft);color:var(--fg)}
+.fields{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.fields .wide{grid-column:1/-1}
+textarea{font:inherit;font-size:14px;color:var(--fg);background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:7px 10px;width:100%;min-width:0;resize:vertical;line-height:1.5}
+.fields label,.seg label{display:flex;flex-direction:column;gap:4px;font-size:12px;color:var(--muted);font-weight:700;min-width:0}
+input[type=text],select,textarea{font:inherit;font-size:14px;color:var(--fg);background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:7px 10px;width:100%;min-width:0}
+.segs{display:flex;flex-direction:column;gap:8px}
+.seg{display:grid;grid-template-columns:1fr 1.4fr;gap:10px;align-items:end}
+.seg .dates{font-size:13px;color:var(--fg)}
+.warn{background:var(--warn-bg);color:var(--warn-fg);border-radius:10px;padding:8px 12px;font-size:13px;font-weight:500}
+.live{position:relative;overflow:hidden;border:1px solid var(--line);border-radius:12px;background:#f4f6fa}
+.scaler{width:1200px;transform-origin:0 0}
+.live .sheet .ed{cursor:pointer;border-radius:10px;outline:3px dashed rgba(74,123,208,.5);outline-offset:4px}
+.live .sheet .ed.editing{outline:5px solid #e07a3f}
+.sheet em{font-style:normal}
+.editor{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--surface);border:2px solid var(--accent);border-radius:12px;padding:12px;display:flex;flex-direction:column;gap:8px}
+.editor label{display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:700;color:var(--muted)}
+.editor textarea{font-size:16px}
+[hidden]{display:none!important}
+.btns{display:flex;gap:8px;flex-wrap:wrap}
+.viewer{position:fixed;inset:0;z-index:50;background:rgba(12,16,26,.92);display:flex;flex-direction:column;padding:env(safe-area-inset-top,0px) max(12px,env(safe-area-inset-right,0px)) env(safe-area-inset-bottom,0px) max(12px,env(safe-area-inset-left,0px))}
+.viewer .vbar{display:flex;gap:12px;align-items:center;justify-content:space-between;padding:12px 0;color:#fff;font-size:14px;line-height:1.5}
+.viewer .vbar p{margin:0}
+.viewer .vbar button{flex:none;background:#fff;color:#1f2a4a;border-color:#fff}
+.viewer .vimg{flex:1;overflow:auto;-webkit-overflow-scrolling:touch}
+.viewer img{display:block;width:100%;max-width:700px;margin:0 auto;height:auto;-webkit-touch-callout:default;user-select:auto}
+.shot{border-radius:12px;border:1px solid var(--line);background:var(--bg);overflow:hidden}
+.shot img{display:block;width:100%;height:auto}
+.shot .wait{padding:40px;text-align:center;color:var(--muted)}
+details{font-size:14px}
+details summary{cursor:pointer;font-weight:700}
+.cat{display:flex;flex-direction:column;gap:10px;margin-top:12px}
+.cat div{border-top:1px solid var(--line);padding-top:8px}
+.cat b{display:block}
+.cat ol{margin:4px 0 0;padding-left:20px;color:var(--muted)}
+@media (max-width:520px){.fields,.seg{grid-template-columns:1fr}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+
+/* ---- 이미지로 저장되는 수업계획서 (고정 디자인) ---- */
+#stage{position:fixed;left:-20000px;top:0;width:1200px;pointer-events:none}
+.sheet{--n:#1f2a4a;--g:#4a5878;--sl:#e3e7ee;--sb:#e3eaf5;width:1200px;background:#f4f6fa;font-family:"Noto Sans KR",sans-serif;color:#1f2a4a;word-break:keep-all;line-height:normal}
+.sheet .bar1{height:14px;background:linear-gradient(90deg,#4a7bd0,#2b3f6e,#1f2a4a)}
+.sheet .bar2{height:14px;background:linear-gradient(90deg,#1f2a4a,#2b3f6e,#4a7bd0)}
+.sheet .wrap{padding:60px 70px 70px}
+.sheet .hello{text-align:center;font-size:34px;color:#4a5878;margin-bottom:6px}
+.sheet h1{text-align:center;font-weight:900;letter-spacing:-1px;line-height:1.2;margin:0;color:#1f2a4a}
+.sheet .time{margin:30px auto 44px;display:table;background:#1f2a4a;color:#fff;border-radius:60px;padding:16px 46px;font-size:36px;font-weight:700}
+.sheet .time span{font-weight:400;opacity:.8;margin-right:16px}
+.sheet .box{background:#fff;border:2px solid #e3e7ee;border-radius:36px;padding:36px 40px 30px;margin-bottom:30px}
+.sheet .mon{font-size:44px;font-weight:900;margin-bottom:18px;padding-left:6px}
+.sheet .grid{display:grid;grid-template-columns:repeat(7,1fr);row-gap:6px}
+.sheet .wd{text-align:center;font-size:26px;font-weight:700;color:#6b7590;padding-bottom:12px;border-bottom:2px solid #e3e7ee;margin-bottom:8px}
+.sheet .wd.sun{color:#d9534f}.sheet .wd.sat{color:#4a7bd0}
+.sheet .cell{height:112px;display:flex;flex-direction:column;align-items:center;padding-top:8px}
+.sheet .num{width:66px;height:66px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:32px;color:#1f2a4a}
+.sheet .cell.sun .num{color:#d9534f}.sheet .cell.sat .num{color:#4a7bd0}
+.sheet .cell.on .num{color:#fff;font-weight:700}
+.sheet .lab{margin-top:6px;font-size:19px;font-weight:700;white-space:nowrap;letter-spacing:-.5px}
+.sheet .legend{display:flex;gap:30px;justify-content:center;margin-top:14px;font-size:24px;color:#4a5878}
+.sheet .legend i{display:inline-block;width:22px;height:22px;border-radius:50%;margin-right:8px;vertical-align:-3px}
+.sheet .sec{font-size:40px;font-weight:900;margin:14px 0 22px 6px}
+.sheet .card{display:flex;gap:28px;background:#fff;border:2px solid #e3e7ee;border-radius:32px;padding:30px 36px;margin-bottom:22px}
+.sheet .badge{flex:none;width:76px;height:76px;border-radius:50%;color:#fff;font-size:34px;font-weight:900;display:flex;align-items:center;justify-content:center}
+.sheet .meta{font-size:24px;color:#4a5878;margin-bottom:6px}
+.sheet .meta b{color:#2b5bb8;background:#eaf1fc;border-radius:16px;padding:3px 14px;margin-left:10px;font-size:21px}
+.sheet .book{font-size:36px;font-weight:700;line-height:1.3;margin-bottom:8px}
+.sheet .book.none{color:#b0b7c8}
+.sheet .desc{font-size:27px;line-height:1.5;color:#333}
+.sheet .lnk{margin-top:12px;font-size:22px;color:#6b7590}
+.sheet .lnk b{color:#4a5878;margin-right:10px}
+.sheet .msg{margin-top:40px;background:#fff;border:2px solid #e3e7ee;border-radius:36px;padding:40px;text-align:center;font-size:34px;line-height:1.6}
+</style>
+
+<div class="page">
+  <header>
+    <h1>달력 수업계획서 만들기</h1>
+    <p>반별 엑셀을 올리면 학부모님께 보낼 달력형 수업계획서 이미지가 바로 만들어져요.</p>
+    <span class="month" id="monthChip"></span>
+  </header>
+
+  <section class="panel" aria-labelledby="up-title">
+    <div class="step">1단계</div>
+    <h2 id="up-title">엑셀 올리기</h2>
+    <label class="drop" id="drop">
+      <input type="file" id="file" accept=".xlsx,.xls">
+      <strong>여기를 눌러 엑셀 파일을 고르세요</strong>
+      <span>컴퓨터에서는 파일을 끌어다 놓아도 돼요</span>
+    </label>
+    <p class="hint">몰입독서, 세계사, 한국사봄처럼 호로 나가는 과정은 단계 칸에 <code>몰입C1</code> <code>세계사2호</code>처럼 호수까지 적어 주세요. 엑셀 첫 줄 제목은 <code>No</code> <code>이름</code> <code>수업요일</code> <code>단계</code> <code>수업일</code> 이 있어야 해요. <code>특이사항</code> 칸에 문구를 적으면 수업계획서 맨 아래 인사말이 그 문구로 바뀌어요. 같은 반 친구는 No 칸을 합쳐(병합) 주세요. 두 과정을 번갈아 하는 반은 과정마다 한 줄씩 단계와 수업일을 적어요.</p>
+    <div class="status" id="status" role="status"></div>
+  </section>
+
+  <section class="panel" id="resultPanel" aria-labelledby="res-title">
+    <div class="bar">
+      <div><div class="step">2단계</div><h2 id="res-title">확인하고 저장하기</h2></div>
+      <button id="saveAll" class="ghost" hidden>전체 한 번에 저장(zip)</button>
+    </div>
+    <p class="hint" id="resHint">아래는 예시예요. 엑셀을 올리면 반마다 이렇게 나와요. 점선 글자를 눌러 고친 뒤 '이미지로 만들기'를 누르세요.</p>
+    <div id="classes" class="segs"></div>
+  </section>
+
+  <section class="panel">
+    <details>
+      <summary>이번 달 등록된 과정과 책 보기</summary>
+      <div class="cat" id="catalogList"></div>
+    </details>
+  </section>
+</div>
+<div id="stage" aria-hidden="true"></div>
+<div id="viewer" class="viewer" role="dialog" aria-modal="true" aria-label="이미지 저장" hidden>
+  <div class="vbar"><p>이미지를 <b>길게 눌러</b> "이미지 저장" 또는 "사진에 저장"을 누르세요.<br>컴퓨터에서는 이미지에서 <b>오른쪽 클릭</b> → "이미지를 다른 이름으로 저장"을 누르세요.</p>
+  <button type="button" id="viewerClose">닫기</button></div>
+  <div class="vimg"><img id="viewerImg" alt="저장할 수업계획서 이미지"></div>
+</div>
+
+<script type="application/json" id="catalog">{"year": 2026, "month": 11, "courses": [{"name": "독서1", "full": "독서리더1", "aliases": ["독서1", "독서리더1", "독서리더"], "sessions": [{"tag": "읽기·쓰기", "book": "바다 없이 못 살아", "desc": "바다에 대한 궁금증을 알아보고, 문단을 나누어 설명문을 써요.", "link": "과학 3-2 2단원 · 국어 3-2 가 2단원"}, {"tag": "비문학 독서", "book": "그렇게 치킨이 된다", "desc": "우리나라의 치킨과 배달 문화를 알아보고 홍보지를 만들어요.", "link": "사회 3-2 2단원 · 국어 3-2 가 1단원"}, {"tag": "토의·토론", "book": "전시장에서 촬영하는 것", "desc": "전시장에서 사진을 찍어도 될지 내 의견을 정해 토론해요.", "link": "도덕 4 3단원 · 국어 4-1 가 2단원"}, {"tag": "문학 독서", "book": "눈의 여왕", "desc": "게르다와 카이의 모험을 정리하고, 새로운 이야기를 상상해요.", "link": "국어 3-2 나 6단원 · 국어 4-2 나 6단원"}], "kind": "monthly"}, {"name": "독서2", "full": "독서리더2", "aliases": ["독서2", "독서리더2"], "kind": "monthly", "sessions": [{"tag": "읽기·쓰기", "book": "다산, 조선을 바꾸다", "desc": "정약용의 생애와 업적을 알아보고 인물책 감상문을 써요.", "link": "국어 4-2 나 4단원 · 국어 5-1 가 독서 단원"}, {"tag": "비문학 독서", "book": "우리도 억울합니다!", "desc": "기후 변화와 환경 문제를 정리하고 환경 보호 발표문을 써요.", "link": "과학 4-2 2·4단원"}, {"tag": "토의·토론", "book": "카페 안 일회용품 사용 규제", "desc": "카페 일회용품 규제에 대해 찬반 토론해요.", "link": "과학 4-2 4단원 · 국어 5-1 가 1단원"}, {"tag": "문학 독서", "book": "미래챗 래미", "desc": "사건을 시간 순서로 정리하고, 스스로 결정하는 자세를 생각해요.", "link": "국어 4-2 나 6단원 · 국어 5-1 가 2단원"}]}, {"name": "어휘1", "full": "어휘리더1", "aliases": ["어휘1", "어휘리더1"], "sessions": [{"tag": "읽기·쓰기", "book": "칭찬하는 게 어렵다고?", "desc": "칭찬하는 방법을 알아보고, 뒷이야기를 써요.", "link": "이야기 1-2 · 국어 1-2 나 6단원"}, {"tag": "문학 읽기", "book": "세상에 둘도 없는 반짝이 신발", "desc": "물건을 소중히 여기는 마음을 생각하고, 새로운 쓰임을 소개해요.", "link": "약속 1-2 · 국어 1-2 나 8단원"}, {"tag": "교과 읽기", "book": "안녕 바다야", "desc": "제주의 동식물과 풍경을 알아보고, 주인공이 되어 일기를 써요.", "link": "자연 2-1 · 국어 2-1 가 3단원"}, {"tag": "발표하기", "book": "여행을 떠나요!", "desc": "우리나라 대표 여행지를 알아보고, 가고 싶은 곳을 발표해요.", "link": "자연 2-1 · 마을 2-1"}], "kind": "monthly"}, {"name": "어휘2", "full": "어휘리더2", "aliases": ["어휘2", "어휘리더2"], "kind": "monthly", "sessions": [{"tag": "읽기·쓰기", "book": "아홉 살의 두발자전거", "desc": "성장에 필요한 마음가짐을 생각하며 뒷이야기를 써요.", "link": "국어 2-2 나 8단원 · 국어 3-1 가 3단원"}, {"tag": "문학 읽기", "book": "아드님 진지 드세요", "desc": "언어 예절의 중요성을 생각하며 일기를 써요.", "link": "국어 2-2 나 5단원 · 국어 3-2 가 4단원"}, {"tag": "교과 읽기", "book": "우리는 어린이예요", "desc": "어린이의 권리를 알아보고 약속하는 글을 써요.", "link": "도덕 3 6단원 · 국어 2-2 나 7단원"}, {"tag": "발표하기", "book": "예절은 우리 약속", "desc": "공공장소의 예절을 알아보고 내 경험을 발표해요.", "link": "국어 2-2 나 7단원 · 국어 3-1 가 2단원"}]}, {"name": "논리1", "full": "논리리더1", "aliases": ["논리1", "논리리더1"], "sessions": [{"tag": "읽기·쓰기", "book": "물 없이는 아무것도 할 수 없어!", "desc": "물 부족 문제를 알아보고, 물 절약을 주제로 연설문을 써요.", "link": "국어 5-2 나 4단원 · 국어 6-1 가 2단원"}, {"tag": "비문학 독서", "book": "법 만드는 아이들", "desc": "법이 만들어지는 과정과 좋은 법의 조건을 알아봐요.", "link": "국어 5-2 나 4단원 · 사회 6-1(천재교과서) 2단원"}, {"tag": "토의·토론", "book": "기업의 새 옷 폐기 규제", "desc": "팔리지 않은 새 옷의 폐기를 막아야 할지 토론해요.", "link": "국어 6-1 가 3단원 · 도덕 5 6단원"}, {"tag": "문학 독서", "book": "마지막 거인", "desc": "주인공의 깨달음을 따라가며 주제를 이해해요.", "link": "국어 5-2 나 5·6단원"}], "kind": "monthly"}, {"name": "논리2", "full": "논리리더2", "aliases": ["논리2", "논리리더2"], "kind": "monthly", "sessions": [{"tag": "읽기·쓰기", "book": "함께 길을 찾는 연대 이야기", "desc": "연대의 힘을 다룬 글을 읽고 기사문을 써요.", "link": "국어 6-2 가 독서 단원 · 도덕 6 6단원"}, {"tag": "고전 독서", "book": "돈키호테", "desc": "돈키호테와 산초의 모험을 정리하고 연극 극본을 써요.", "link": "국어 6-1 가 1단원 · 국어 6-2 가 1단원"}, {"tag": "토의·토론", "book": "이상과 현실", "desc": "돈키호테와 산초를 통해 이상과 현실에 대해 토론해요.", "link": "국어 6-1 가 3단원 · 국어 6-2 가 1단원"}, {"tag": "고전 독서", "book": "어린이 서유기", "desc": "손오공 일행의 여정을 살피고 영화 시놉시스를 써요.", "link": "국어 6-1 가 1단원 · 국어 6-2 가 독서 단원"}]}, {"name": "과학탐탐", "full": "과학탐탐", "aliases": ["과학탐탐"], "sessions": [{"tag": "과학 독서", "book": "소리가 궁금해!", "desc": "소리의 성질과 쓰임을 알아보고 배운 내용을 글로 정리해요.", "link": "과학 3-2 3단원"}, {"tag": "비문학 독서", "book": "그렇게 치킨이 된다", "desc": "우리나라의 치킨과 배달 문화를 알아보고 홍보지를 만들어요.", "link": "사회 3-2 2단원 · 국어 3-2 가 1단원"}, {"tag": "토의·토론", "book": "전시장에서 촬영하는 것", "desc": "전시장에서 사진을 찍어도 될지 내 의견을 정해 토론해요.", "link": "도덕 4 3단원 · 국어 4-1 가 2단원"}, {"tag": "문학 독서", "book": "눈의 여왕", "desc": "게르다와 카이의 모험을 정리하고, 새로운 이야기를 상상해요.", "link": "국어 3-2 나 6단원 · 국어 4-2 나 6단원"}], "kind": "monthly"}, {"name": "세계문화지리", "full": "세계문화·지리", "aliases": ["세계문화지리", "세계문화·지리", "세계문화", "세계지리", "세계문화와지리"], "kind": "monthly", "sessions": [{"tag": "지리 독서", "book": "지리 톡 세계 Talk 09 오세아니아와 극지방", "desc": "오세아니아와 극지방의 특징을 알아보고 보존과 개발을 고민해요.", "link": "사회 6-1 3단원 · 사회 6-2 1단원"}, {"tag": "비문학 독서", "book": "법 만드는 아이들", "desc": "법이 만들어지는 과정과 좋은 법의 조건을 알아봐요.", "link": "국어 5-2 나 4단원 · 사회 6-1 2단원"}, {"tag": "토의·토론", "book": "기업의 새 옷 폐기 규제", "desc": "팔리지 않은 새 옷의 폐기를 막아야 할지 토론해요.", "link": "국어 6-1 가 3단원 · 도덕 5 6단원"}, {"tag": "문학 독서", "book": "마지막 거인", "desc": "주인공의 깨달음을 따라가며 주제를 이해해요.", "link": "국어 5-2 나 5·6단원"}]}, {"name": "새싹1", "full": "꿈꾸는새싹1", "aliases": ["새싹1", "꿈꾸는새싹1"], "sessions": [{"tag": "그림책 하나", "book": "숫자 넘어 숫자 이야기", "desc": "주변에서 숫자를 찾아 세어 보고, 숫자 책을 만들어요.", "link": "누리과정 자연탐구영역"}, {"tag": "그림책 둘", "book": "우산도 우산이 필요해", "desc": "친구를 배려하고 존중하는 말과 행동을 알아봐요.", "link": "누리과정 사회관계영역"}, {"tag": "튼튼 고전 놀이터", "book": "알라딘과 요술램프", "desc": "위기에 맞서는 용기에 대해 생각해 봐요.", "link": "누리과정 사회관계영역"}, {"tag": "말과 글 놀이터", "book": "움직임을 나타내요", "desc": "움직임을 나타내는 낱말을 읽고, 몸으로 표현해요.", "link": "누리과정 자연탐구영역"}], "kind": "monthly"}, {"name": "새싹2", "full": "꿈꾸는새싹2", "aliases": ["새싹2", "꿈꾸는새싹2"], "kind": "monthly", "sessions": [{"tag": "그림책 하나", "book": "춤추는 가나다라", "desc": "자음과 모음의 이름을 익히고, 말놀이와 낱말 책 만들기를 해요.", "link": "국어 1-1 가 1단원 · 우리나라 1-1"}, {"tag": "그림책 둘", "book": "바다표범 아뉴의 모험", "desc": "바다 생물을 살피고, 주인공의 마음을 담아 그림일기를 써요.", "link": "탐험 1-1 · 국어 1-1 나 6단원"}, {"tag": "튼튼 고전 놀이터", "book": "심술쟁이 옹고집", "desc": "옹고집이 잘못을 뉘우치는 과정을 보며 뒷이야기를 상상해요.", "link": "국어 1-1 나 7단원 · 사람들 1-1"}, {"tag": "말과 글 놀이터", "book": "학교에 간다면", "desc": "학교생활에 필요한 물건과 습관을 알고, 낱말 생각 그물을 만들어요.", "link": "학교 1-1 · 국어 1-1 나 4단원"}]}, {"name": "소크라테스1", "full": "소크라테스1", "aliases": ["소1", "소크라테스1"], "sessions": [{"tag": "단편소설 독해", "book": "월급 45루피", "desc": "가장의 무게와 가족의 의미를 생각하며 감상문을 써요.", "link": "진로와 직업 Ⅰ단원 · 도덕2 Ⅰ단원"}, {"tag": "IB 독서", "book": "나무를 심은 사람", "desc": "한 사람의 꾸준한 노력이 세상을 바꾸는 과정을 탐구해요.", "link": "환경 Ⅰ단원 · 도덕2 Ⅰ단원"}, {"tag": "계열 독서", "book": "세상을 바꾸는 픽토그램 이야기", "desc": "모두를 위한 픽토그램의 역할과 영향력을 알아봐요.", "link": "사회1 12단원 · 기술·가정1 Ⅳ단원"}, {"tag": "통합사회 토론", "book": "자율 주행 자동차 상용화", "desc": "자율 주행 자동차를 상용화해야 할지 토론해요.", "link": "기술·가정2 Ⅴ단원 · 정보 Ⅳ단원"}], "kind": "monthly"}, {"name": "소크라테스2", "full": "소크라테스2", "aliases": ["소2", "소크라테스2"], "sessions": [{"tag": "단편소설 독해", "book": "농우", "desc": "일제 강점기 농민의 삶을 살펴보고 감상문을 써요.", "link": "도덕2 Ⅱ단원 · 한국사2 Ⅰ단원"}, {"tag": "IB 독서", "book": "변신 외", "desc": "현대인의 소외 문제를 '관계'를 중심으로 탐구해요.", "link": "역사1 Ⅴ단원 · 기술·가정2 Ⅰ단원"}, {"tag": "계열 독서", "book": "세상에서 가장 쓸모 있는 치의학", "desc": "치의학의 발전 과정과 연구의 중요성을 알아봐요.", "link": "진로와 직업 Ⅰ단원 · 보건 Ⅰ단원"}, {"tag": "통합사회 토론", "book": "사관학교 통합", "desc": "육·해·공군 사관학교 통합에 대해 찬반 토론해요.", "link": "사회2 XI단원 · 기술·가정2 Ⅵ단원"}], "kind": "monthly"}, {"name": "소크라테스3", "full": "소크라테스3", "aliases": ["소3", "소크라테스3"], "kind": "monthly", "sessions": [{"tag": "단편소설 독해", "book": "운영전", "desc": "운영과 김 진사의 사랑을 읽고 사랑과 자유에 대한 감상문을 써요.", "link": "고등 공통국어② 3단원 · 고등 한국사① Ⅰ단원"}, {"tag": "IB 독서", "book": "야간비행", "desc": "인물들의 행동으로 '공동체' 개념을 탐구해요.", "link": "중학교 도덕② Ⅲ단원 · 진로와 직업 Ⅱ단원"}, {"tag": "계열 독서", "book": "내가 만든 게임이 레전드가 된다면", "desc": "게임 리터러시와 게임 관련 진로를 알아보고 수행평가를 완성해요.", "link": "고등 인문학과 윤리 Ⅳ단원 · 인공지능 기초 Ⅰ단원"}, {"tag": "통합사회 논·구술", "book": "인간의 본성과 공공성", "desc": "인간의 본성과 공공성을 비교·대조하며 논·구술해요.", "link": "고등 통합사회② Ⅱ단원 · 정치 Ⅰ단원"}]}, {"name": "몰입P1", "full": "몰입독서 P단계 1호", "aliases": ["몰입p1", "몰입독서p1", "몰입독서p단계1호", "몰입p단계1호", "p1"], "sessions": [{"tag": "유창성 훈련", "book": "글자-소리 맞추어 읽기", "desc": "글자마다 다른 소릿값을 알고, 글자에 맞는 소리로 읽어요."}, {"tag": "몰입독서", "book": "모두 다 1이야", "desc": "곰 선생님 이야기로 칭찬과 격려의 가치를 느껴요."}, {"tag": "유창성 훈련", "book": "반복하여 읽기", "desc": "매끄럽지 않은 부분을 반복해 읽으며 정확하게 읽는 힘을 길러요."}, {"tag": "몰입독서", "book": "탁탁, 톡톡, 음매~ 젖소가 편지를 쓴대요", "desc": "편지로 협상하는 농장 동물들의 갈등 해결 과정을 정리해요."}], "kind": "series"}, {"name": "몰입P2", "full": "몰입독서 P단계 2호", "aliases": ["몰입p2", "몰입독서p2", "몰입독서p단계2호", "몰입p단계2호", "p2"], "sessions": [{"tag": "유창성 훈련", "book": "알맞게 띄어 읽기", "desc": "문장을 알맞은 덩어리로 묶어 띄어 읽는 연습을 해요."}, {"tag": "몰입독서", "book": "이 상한 도서관장의 이상한 도서관", "desc": "띄어쓰기에 따라 뜻이 달라지는 말을 알아봐요."}, {"tag": "유창성 훈련", "book": "자연스러운 빠르기로 읽기", "desc": "빠르기를 바꿔 가며 자연스럽게 읽는 연습을 해요."}, {"tag": "몰입독서", "book": "이게 뭔지 알아맞혀 볼래?", "desc": "사건의 흐름을 따라가며 사라져 가는 옛 문화를 알아봐요."}], "kind": "series"}, {"name": "몰입P3", "full": "몰입독서 P단계 3호", "aliases": ["몰입p3", "몰입독서p3", "몰입독서p단계3호", "몰입p단계3호", "p3"], "sessions": [{"tag": "유창성 훈련", "book": "낱말의 느낌을 살려 읽기", "desc": "낱말의 뜻에 맞게 목소리를 조절하며 읽는 연습을 해요."}, {"tag": "몰입독서", "book": "슈퍼 토끼", "desc": "경주에서 진 토끼의 모습으로 실패를 대하는 태도를 생각해요."}, {"tag": "유창성 훈련", "book": "문장 부호에 따라 읽기", "desc": "문장 부호를 살피며 뜻이 잘 드러나게 읽는 연습을 해요."}, {"tag": "몰입독서", "book": "훨훨 간다", "desc": "옛이야기의 재미를 느끼며 이야기 흐름을 정리해요."}], "kind": "series"}, {"name": "몰입P4", "full": "몰입독서 P단계 4호", "aliases": ["몰입p4", "몰입독서p4", "몰입독서p단계4호", "몰입p단계4호", "p4"], "sessions": [{"tag": "유창성 훈련", "book": "정확한 발음으로 읽기 ①", "desc": "글자와 다르게 소리 나는 낱말을 바르게 발음하며 읽어요."}, {"tag": "몰입독서", "book": "멸치 대왕의 꿈", "desc": "같은 꿈을 다르게 풀이한 두 인물의 생각을 비교해요."}, {"tag": "유창성 훈련", "book": "알맞게 끊어 읽기", "desc": "뜻이 이어지는 부분을 덩어리로 끊어 읽는 연습을 해요."}, {"tag": "몰입독서", "book": "민들레", "desc": "민들레의 한살이 과정을 중심으로 내용을 정리해요."}], "kind": "series"}, {"name": "몰입P5", "full": "몰입독서 P단계 5호", "aliases": ["몰입p5", "몰입독서p5", "몰입독서p단계5호", "몰입p단계5호", "p5"], "sessions": [{"tag": "유창성 훈련", "book": "정확한 발음으로 읽기 ②", "desc": "이웃한 글자에 따라 바뀌는 소리에 주의하며 읽어요."}, {"tag": "몰입독서", "book": "친구를 사귀는 아주 특별한 방법", "desc": "이사 온 아이가 친구를 사귀는 이야기를 주인공 입장에서 정리해요."}, {"tag": "유창성 훈련", "book": "정해진 빠르기로 읽기", "desc": "기준 속도에 맞춰 막힘없이 읽는 연습을 해요."}, {"tag": "몰입독서", "book": "내 엉덩이는 내가 책임진다", "desc": "생활 속 문제를 해결하는 아이들의 이야기를 정리해요."}], "kind": "series"}, {"name": "몰입P6", "full": "몰입독서 P단계 6호", "aliases": ["몰입p6", "몰입독서p6", "몰입독서p단계6호", "몰입p단계6호", "p6"], "sessions": [{"tag": "유창성 훈련", "book": "감정을 담아 읽기", "desc": "인물의 마음에 맞는 목소리로 읽는 연습을 해요."}, {"tag": "몰입독서", "book": "노란 양동이", "desc": "아기 여우와 친구들의 대화를 바탕으로 내용을 정리해요."}, {"tag": "유창성 훈련", "book": "유창하게 읽기", "desc": "발음, 속도, 표현을 살려 매끄럽게 읽는 연습을 해요."}, {"tag": "몰입독서", "book": "악당들하고는 친구 안 해!", "desc": "다투고 다시 어울리는 친구들의 이야기로 우정을 느껴요."}], "kind": "series"}, {"name": "몰입A1", "full": "몰입독서 A단계 1호", "aliases": ["몰입a1", "몰입독서a1", "몰입독서a단계1호", "몰입a단계1호", "a1"], "sessions": [{"tag": "몰입독서", "book": "집에 있는 부엉이", "desc": "따라 읽기로 유창성을 기르고, 사건의 진실을 정리해요."}, {"tag": "몰입독서", "book": "집에 있는 부엉이", "desc": "정확한 발음으로 읽고, 다섯 이야기의 공통 주제를 확인해요."}, {"tag": "몰입독서", "book": "상우가 없었다면", "desc": "리듬을 살려 읽고, 등장인물의 성격과 특징을 정리해요."}, {"tag": "몰입독서", "book": "상우가 없었다면", "desc": "몸짓과 표정을 살려 읽고, 인물의 감정과 책의 주제를 정리해요."}], "kind": "series"}, {"name": "몰입A2", "full": "몰입독서 A단계 2호", "aliases": ["몰입a2", "몰입독서a2", "몰입독서a단계2호", "몰입a단계2호", "a2"], "sessions": [{"tag": "몰입독서", "book": "콘브레드와 포피 ① 으르렁산에 가다", "desc": "역할 읽기를 하고, 두 인물의 성격을 비교해 정리해요."}, {"tag": "몰입독서", "book": "콘브레드와 포피 ① 으르렁산에 가다", "desc": "감정을 살려 읽고, 주요 사건과 인물이 깨달은 점을 정리해요."}, {"tag": "몰입독서", "book": "싫어요 몰라요 그냥요", "desc": "반복해 읽으며 두 편의 이야기를 정리하고 비교해요."}, {"tag": "몰입독서", "book": "싫어요 몰라요 그냥요", "desc": "함께 읽고, 인물의 특징을 정리해 내 경험과 연결해요."}], "kind": "series"}, {"name": "몰입A3", "full": "몰입독서 A단계 3호", "aliases": ["몰입a3", "몰입독서a3", "몰입독서a단계3호", "몰입a단계3호", "a3"], "sessions": [{"tag": "몰입독서", "book": "2학년 3반 오지랖 오지영", "desc": "시간 제한 읽기를 하고, 주인공의 성격을 평가해 봐요."}, {"tag": "몰입독서", "book": "2학년 3반 오지랖 오지영", "desc": "끊어 읽기를 하고, 책 내용에 대한 내 생각을 표현해요."}, {"tag": "몰입독서", "book": "느림보 거북이의 단단한 결심", "desc": "단락 읽기를 하고, 인물의 대화를 중심으로 줄거리를 정리해요."}, {"tag": "몰입독서", "book": "느림보 거북이의 단단한 결심", "desc": "주인공이 겪은 일을 일기로 쓰고, 배울 점을 생각해요."}], "kind": "series"}, {"name": "몰입A4", "full": "몰입독서 A단계 4호", "aliases": ["몰입a4", "몰입독서a4", "몰입독서a단계4호", "몰입a단계4호", "a4"], "sessions": [{"tag": "몰입독서", "book": "나, 꾀병 아니라고요", "desc": "역할 읽기를 하고, 인물이 겪은 일을 사건 수첩으로 정리해요."}, {"tag": "몰입독서", "book": "나, 꾀병 아니라고요", "desc": "주요 장면의 대사를 정리하고, 내 경험과 연결해요."}, {"tag": "몰입독서", "book": "냉장고가 멈춘 날", "desc": "따라 읽으며 낯선 낱말을 찾고, 새 낱말로 내용을 정리해요."}, {"tag": "몰입독서", "book": "냉장고가 멈춘 날", "desc": "옛사람의 음식 저장 지혜를 알아보고, 우리 집 식생활을 살펴봐요."}], "kind": "series"}, {"name": "몰입A5", "full": "몰입독서 A단계 5호", "aliases": ["몰입a5", "몰입독서a5", "몰입독서a단계5호", "몰입a단계5호", "a5"], "sessions": [{"tag": "몰입독서", "book": "나를 위한 우르릉 쾅쾅", "desc": "함께 읽으며 삽화와 내용을 연결하고, 중요한 장면을 정리해요."}, {"tag": "몰입독서", "book": "나를 위한 우르릉 쾅쾅", "desc": "주인공의 속마음을 날씨로 표현하고, 주제를 이해해요."}, {"tag": "몰입독서", "book": "까막눈 삼디기", "desc": "단락 읽기를 하고, 주인공의 특징을 정리해요."}, {"tag": "몰입독서", "book": "까막눈 삼디기", "desc": "인물 변화표를 정리하며 주인공의 성장을 살펴봐요."}], "kind": "series"}, {"name": "몰입A6", "full": "몰입독서 A단계 6호", "aliases": ["몰입a6", "몰입독서a6", "몰입독서a단계6호", "몰입a단계6호", "a6"], "sessions": [{"tag": "몰입독서", "book": "24분 편의점 1호", "desc": "반복해 읽으며 자석에 대한 과학 상식을 정리해요."}, {"tag": "몰입독서", "book": "24분 편의점 1호", "desc": "내 경험과 연결하고, 전자석 원리를 활용한 상상을 해 봐요."}, {"tag": "몰입독서", "book": "허풍선이 타령", "desc": "리듬을 살려 읽고, 이야기 속 인물의 반응을 정리해요."}, {"tag": "몰입독서", "book": "허풍선이 타령", "desc": "인물 말주머니를 완성하고, 여섯 편의 이야기로 주제를 확인해요."}], "kind": "series"}, {"name": "몰입B1", "full": "몰입독서 B단계 1호", "aliases": ["몰입b1", "몰입독서b1", "몰입독서b단계1호", "몰입b단계1호", "b1"], "sessions": [{"tag": "몰입독서", "book": "잘 들어 주는 개", "desc": "끊어 읽기를 하고, 시간 순서에 따라 이야기를 정리해요."}, {"tag": "몰입독서", "book": "잘 들어 주는 개", "desc": "인물의 과거와 현재를 비교하고, 세 이야기의 공통점을 찾아요."}, {"tag": "몰입독서", "book": "우리 반 채무 관계", "desc": "짝과 번갈아 읽고, 사건별로 줄거리를 정리해요."}, {"tag": "몰입독서", "book": "우리 반 채무 관계", "desc": "인물들의 문제 해결 방식으로 책의 주제를 파악해요."}], "kind": "series"}, {"name": "몰입B2", "full": "몰입독서 B단계 2호", "aliases": ["몰입b2", "몰입독서b2", "몰입독서b단계2호", "몰입b단계2호", "b2"], "sessions": [{"tag": "몰입독서", "book": "기적의 분실함", "desc": "분위기를 살려 읽고, 장소의 변화에 따라 내용을 정리해요."}, {"tag": "몰입독서", "book": "기적의 분실함", "desc": "인물의 감정과 상황을 연결하고, 인물들의 관계를 내게 적용해요."}, {"tag": "몰입독서", "book": "밥상에 우리말이 가득하네", "desc": "낱말의 뜻을 짐작하며 읽고, 새 낱말로 문장을 지어요."}, {"tag": "몰입독서", "book": "밥상에 우리말이 가득하네", "desc": "우리말의 어원을 정리하고, 우리말을 익히면 좋은 점을 생각해요."}], "kind": "series"}, {"name": "몰입B3", "full": "몰입독서 B단계 3호", "aliases": ["몰입b3", "몰입독서b3", "몰입독서b단계3호", "몰입b단계3호", "b3"], "sessions": [{"tag": "몰입독서", "book": "얘야, 아무개야, 거시기야!", "desc": "칠일장의 의미를 알아보고, 삽화와 함께 줄거리를 정리해요."}, {"tag": "몰입독서", "book": "얘야, 아무개야, 거시기야!", "desc": "인물의 입장에서 생각하며 이야기의 구조를 이해해요."}, {"tag": "몰입독서", "book": "소금아, 진짜 고마워!", "desc": "중심 문장을 찾으며 소금 이야기를 주제별로 정리해요."}, {"tag": "몰입독서", "book": "소금아, 진짜 고마워!", "desc": "새로 알게 된 내용으로 책의 주제를 파악해요."}], "kind": "series"}, {"name": "몰입B4", "full": "몰입독서 B단계 4호", "aliases": ["몰입b4", "몰입독서b4", "몰입독서b단계4호", "몰입b단계4호", "b4"], "sessions": [{"tag": "몰입독서", "book": "빵 터져 버릴지도 몰라요", "desc": "시의 장면을 상상하며 읽고, 사진으로 내용을 정리해요."}, {"tag": "몰입독서", "book": "빵 터져 버릴지도 몰라요", "desc": "동시를 읽고 느낌을 나누며 감상을 정리해요."}, {"tag": "몰입독서", "book": "거꾸로 말대꾸", "desc": "짝과 번갈아 읽고, 사건에 대한 인물들의 반응을 비교해요."}, {"tag": "몰입독서", "book": "거꾸로 말대꾸", "desc": "인물의 감정 변화로 줄거리를 정리하고 주제를 파악해요."}], "kind": "series"}, {"name": "몰입B5", "full": "몰입독서 B단계 5호", "aliases": ["몰입b5", "몰입독서b5", "몰입독서b단계5호", "몰입b단계5호", "b5"], "sessions": [{"tag": "몰입독서", "book": "궁금해요, 장영실", "desc": "끊어 읽기를 하고, 장영실의 삶을 시간 순서대로 정리해요."}, {"tag": "몰입독서", "book": "궁금해요, 장영실", "desc": "장영실이 과제를 해결한 방법과 삶의 태도를 살펴봐요."}, {"tag": "몰입독서", "book": "괴물딱지", "desc": "인물 간 관계를 살피며 태도 변화를 중심으로 정리해요."}, {"tag": "몰입독서", "book": "괴물딱지", "desc": "이야기 전개를 확인하며 줄거리와 구조를 정리해요."}], "kind": "series"}, {"name": "몰입B6", "full": "몰입독서 B단계 6호", "aliases": ["몰입b6", "몰입독서b6", "몰입독서b단계6호", "몰입b단계6호", "b6"], "sessions": [{"tag": "몰입독서", "book": "지우개 따먹기 법칙", "desc": "인물 관계를 정리하며 읽기 이해력을 길러요."}, {"tag": "몰입독서", "book": "지우개 따먹기 법칙", "desc": "인물이 받은 영향을 정리하고, 놀이의 의미를 생각해요."}, {"tag": "몰입독서", "book": "생명에게 배운다 ② 알아 간다는 것", "desc": "남극 펭귄 탐사기를 읽고, 탐사 경로를 정리해요."}, {"tag": "몰입독서", "book": "생명에게 배운다 ② 알아 간다는 것", "desc": "중심 문장을 찾아 내용을 분류하고, 탐사의 목적을 생각해요."}], "kind": "series"}, {"name": "몰입C1", "full": "몰입독서 C단계 1호", "aliases": ["몰입c1", "몰입독서c1", "몰입독서c단계1호", "몰입c단계1호", "c1"], "sessions": [{"tag": "몰입독서", "book": "말라깽이 돼지 애니", "desc": "등장인물을 찾으며 읽고, 인물 찾기 전단지를 만들어요."}, {"tag": "몰입독서", "book": "말라깽이 돼지 애니", "desc": "인물 관계도를 그리고, 행복의 기준을 생각해 봐요."}, {"tag": "몰입독서", "book": "도서관에 가지 마, 절대로", "desc": "중요한 사건을 찾으며 읽고 별 모양으로 정리해요."}, {"tag": "몰입독서", "book": "도서관에 가지 마, 절대로", "desc": "사건의 흐름을 파악하고, 책 표지를 새롭게 만들어요."}], "kind": "series"}, {"name": "몰입C2", "full": "몰입독서 C단계 2호", "aliases": ["몰입c2", "몰입독서c2", "몰입독서c단계2호", "몰입c단계2호", "c2"], "sessions": [{"tag": "몰입독서", "book": "신기한 혀 시간표", "desc": "질문에 답하며 읽고, 혀 탐구 보고서를 써요."}, {"tag": "몰입독서", "book": "신기한 혀 시간표", "desc": "혀의 구조와 기능을 정리하며 학습 일지를 써요."}, {"tag": "몰입독서", "book": "마술 딱지", "desc": "인물의 마음을 살피며 읽고, 가족 소개서를 써요."}, {"tag": "몰입독서", "book": "마술 딱지", "desc": "인물의 마음 변화를 정리하며 가족의 소중함을 생각해요."}], "kind": "series"}, {"name": "몰입C3", "full": "몰입독서 C단계 3호", "aliases": ["몰입c3", "몰입독서c3", "몰입독서c단계3호", "몰입c단계3호", "c3"], "sessions": [{"tag": "몰입독서", "book": "수상한 아이가 전학 왔다!", "desc": "단서를 찾으며 읽고, 계획과 결과를 표로 정리해요."}, {"tag": "몰입독서", "book": "수상한 아이가 전학 왔다!", "desc": "인물의 생각 변화를 살피며 오해와 진실을 정리해요."}, {"tag": "몰입독서", "book": "왜 이런 이름이 생겼을까? : 사물", "desc": "사물 이름의 유래를 알아보고 유래 카드를 만들어요."}, {"tag": "몰입독서", "book": "왜 이런 이름이 생겼을까? : 사물", "desc": "사물 이름의 뜻을 비교하고, 주변 사물의 이름을 새로 지어 봐요."}], "kind": "series"}, {"name": "몰입C4", "full": "몰입독서 C단계 4호", "aliases": ["몰입c4", "몰입독서c4", "몰입독서c단계4호", "몰입c단계4호", "c4"], "sessions": [{"tag": "몰입독서", "book": "다람쥐 똥", "desc": "사람처럼 표현된 대상을 찾고, 등장인물 말풍선을 완성해요."}, {"tag": "몰입독서", "book": "다람쥐 똥", "desc": "우화의 주제를 이해하고, 여덟 편의 이야기를 주제별로 나눠요."}, {"tag": "몰입독서", "book": "육식과 채식", "desc": "육식과 채식의 문제를 살펴보고, 고기 유통 흐름도를 만들어요."}, {"tag": "몰입독서", "book": "육식과 채식", "desc": "문제의 해결 방법을 찾아 카드 뉴스를 만들어요."}], "kind": "series"}, {"name": "몰입C5", "full": "몰입독서 C단계 5호", "aliases": ["몰입c5", "몰입독서c5", "몰입독서c단계5호", "몰입c단계5호", "c5"], "sessions": [{"tag": "몰입독서", "book": "도깨비가 슬금슬금", "desc": "등장인물의 성격을 파악하며 등장인물 카드를 만들어요."}, {"tag": "몰입독서", "book": "도깨비가 슬금슬금", "desc": "등장인물을 비교하고, 도깨비 인터뷰를 완성해요."}, {"tag": "몰입독서", "book": "초코파이", "desc": "이야기 속 소재를 찾으며 인물의 마음을 짐작해요."}, {"tag": "몰입독서", "book": "초코파이", "desc": "소재의 의미를 이해하고, 책 내용을 생활에 적용해요."}], "kind": "series"}, {"name": "몰입C6", "full": "몰입독서 C단계 6호", "aliases": ["몰입c6", "몰입독서c6", "몰입독서c단계6호", "몰입c단계6호", "c6"], "sessions": [{"tag": "몰입독서", "book": "내 마음 아무도 몰라요", "desc": "등장인물의 갈등을 파악하고, 갈등 줄다리기를 완성해요."}, {"tag": "몰입독서", "book": "내 마음 아무도 몰라요", "desc": "갈등에 대처하는 태도를 살피고, 인물의 상황에 공감해요."}, {"tag": "몰입독서", "book": "별이 된 라이카", "desc": "이야기의 배경을 정리하며 훈련 일지를 완성해요."}, {"tag": "몰입독서", "book": "별이 된 라이카", "desc": "역사적 배경과 연결해 읽고, 동물 희생에 대해 생각해요."}], "kind": "series"}, {"name": "몰입D1", "full": "몰입독서 D단계 1호", "aliases": ["몰입d1", "몰입독서d1", "몰입독서d단계1호", "몰입d단계1호", "d1"], "sessions": [{"tag": "몰입독서", "book": "오늘도 수줍은 차마니", "desc": "인물의 감정을 파악하며 읽고, 감정 차트를 정리해요."}, {"tag": "몰입독서", "book": "오늘도 수줍은 차마니", "desc": "인물에 공감하며 읽고, 갈등과 해결 과정을 정리해요."}, {"tag": "몰입독서", "book": "옹고집, 똥고집!", "desc": "희곡의 특징을 알아보고, 인물의 성격을 정리해요."}, {"tag": "몰입독서", "book": "옹고집, 똥고집!", "desc": "실감 나게 낭독하며 인물을 분석하고 주제를 알아봐요."}], "kind": "series"}, {"name": "몰입D2", "full": "몰입독서 D단계 2호", "aliases": ["몰입d2", "몰입독서d2", "몰입독서d단계2호", "몰입d단계2호", "d2"], "sessions": [{"tag": "몰입독서", "book": "그림자 세탁소", "desc": "소설의 구성 요소를 알아보고, 인물의 반응을 정리해요."}, {"tag": "몰입독서", "book": "그림자 세탁소", "desc": "인물의 태도 변화를 살피며 각 이야기의 주제를 확인해요."}, {"tag": "몰입독서", "book": "다 말해! 다마레", "desc": "일제 강점기 시대 상황을 알아보고, 인물 관계도를 완성해요."}, {"tag": "몰입독서", "book": "다 말해! 다마레", "desc": "우리말 수난의 역사를 살피며 우리말의 소중함을 생각해요."}], "kind": "series"}, {"name": "몰입D3", "full": "몰입독서 D단계 3호", "aliases": ["몰입d3", "몰입독서d3", "몰입독서d단계3호", "몰입d단계3호", "d3"], "sessions": [{"tag": "몰입독서", "book": "살아 있는 모든 것들", "desc": "사람과 동물의 관계를 살피며, 인물의 입장에서 글을 써요."}, {"tag": "몰입독서", "book": "살아 있는 모든 것들", "desc": "동물이 인물에게 준 영향을 정리하고, 주제를 알아봐요."}, {"tag": "몰입독서", "book": "밥상의 역사", "desc": "시대에 따라 달라진 밥상을 알아보고 표현해요."}, {"tag": "몰입독서", "book": "밥상의 역사", "desc": "원인과 결과를 정리하고, 우리 집 식생활을 살펴봐요."}], "kind": "series"}, {"name": "몰입D4", "full": "몰입독서 D단계 4호", "aliases": ["몰입d4", "몰입독서d4", "몰입독서d단계4호", "몰입d단계4호", "d4"], "sessions": [{"tag": "몰입독서", "book": "서브", "desc": "서술자를 파악하며 읽고, 인물 카드를 완성해요."}, {"tag": "몰입독서", "book": "서브", "desc": "서술자가 바뀌는 흐름을 살피며 인물 인터뷰를 완성해요."}, {"tag": "몰입독서", "book": "오디세우스의 모험 일지", "desc": "오디세우스의 모험을 따라 읽고, 모험 지도를 완성해요."}, {"tag": "몰입독서", "book": "오디세우스의 모험 일지", "desc": "인물이 얻은 깨달음을 살피고, 오늘날의 교훈을 생각해요."}], "kind": "series"}, {"name": "몰입D5", "full": "몰입독서 D단계 5호", "aliases": ["몰입d5", "몰입독서d5", "몰입독서d단계5호", "몰입d단계5호", "d5"], "sessions": [{"tag": "몰입독서", "book": "닐과 순다리", "desc": "소설의 갈등을 파악하고, 인물의 상황을 정리해요."}, {"tag": "몰입독서", "book": "닐과 순다리", "desc": "갈등 해결 과정을 살피며 주인공의 가치관을 알아봐요."}, {"tag": "몰입독서", "book": "면역과 질병", "desc": "면역의 주요 개념을 찾으며 면역 체계도를 완성해요."}, {"tag": "몰입독서", "book": "면역과 질병", "desc": "질병을 분류해 정리하고, 예방 수칙을 생활에 적용해요."}], "kind": "series"}, {"name": "몰입D6", "full": "몰입독서 D단계 6호", "aliases": ["몰입d6", "몰입독서d6", "몰입독서d단계6호", "몰입d단계6호", "d6"], "sessions": [{"tag": "몰입독서", "book": "처음 만나는 이별", "desc": "소설의 소재를 파악하며 소재 설명 그물을 완성해요."}, {"tag": "몰입독서", "book": "처음 만나는 이별", "desc": "인물이 소재를 대하는 태도로 책의 주제를 찾아요."}, {"tag": "몰입독서", "book": "우리 겨레 수학 이야기", "desc": "조상들의 계산법을 알아보고 오늘날과 비교해요."}, {"tag": "몰입독서", "book": "우리 겨레 수학 이야기", "desc": "일상 속 수학의 쓰임을 알아보고 직업 사전을 만들어요."}], "kind": "series"}, {"name": "몰입S1", "full": "몰입독서 S단계 1호", "aliases": ["몰입s1", "몰입독서s1", "몰입독서s단계1호", "몰입s단계1호", "s1"], "sessions": [{"tag": "읽기 전", "book": "멈출 수 없는 우리 1", "desc": "인류의 진화에 대한 배경지식을 쌓고, 추론과 논증 읽기 전략을 익혀요."}, {"tag": "읽기 중", "book": "멈출 수 없는 우리 1", "desc": "진화·협력 등 핵심어를 찾으며 읽고, 생각 그물로 정리해요."}, {"tag": "읽기 중", "book": "멈출 수 없는 우리 1", "desc": "수렵·채집·멸종 등 핵심어를 찾으며 읽고, 연대표로 정리해요."}, {"tag": "읽기 후 · 글쓰기", "book": "멈출 수 없는 우리 1", "desc": "'인류는 자연과 공생해야 한다'를 주제로 논설문을 써요."}], "kind": "series"}, {"name": "몰입S2", "full": "몰입독서 S단계 2호", "aliases": ["몰입s2", "몰입독서s2", "몰입독서s단계2호", "몰입s단계2호", "s2"], "sessions": [{"tag": "읽기 전", "book": "클로디아의 비밀", "desc": "소설의 특성과 구성 요소를 익히고, 읽기 목표를 세워요."}, {"tag": "읽기 중", "book": "클로디아의 비밀", "desc": "주요 사건을 정리하며 읽고, 장소-사건 기차를 만들어요."}, {"tag": "읽기 중", "book": "클로디아의 비밀", "desc": "핵심어와 사건을 정리하며 읽고, 인물의 유언장을 써요."}, {"tag": "읽기 후 · 글쓰기", "book": "클로디아의 비밀", "desc": "감상을 나누고 주제를 넓혀 초단편 소설을 써요."}], "kind": "series"}, {"name": "몰입S3", "full": "몰입독서 S단계 3호", "aliases": ["몰입s3", "몰입독서s3", "몰입독서s단계3호", "몰입s단계3호", "s3"], "sessions": [{"tag": "읽기 전", "book": "과학이 어려운 딸에게", "desc": "마리 퀴리에 대한 배경지식을 쌓고, 질문과 설명 방법 읽기 전략을 익혀요."}, {"tag": "읽기 중", "book": "과학이 어려운 딸에게", "desc": "공기·기압 등 핵심어를 찾으며 읽고, 필기 노트로 정리해요."}, {"tag": "읽기 중", "book": "과학이 어려운 딸에게", "desc": "밀도·아르키메데스의 원리를 알아보고, 그림 카드로 정리해요."}, {"tag": "읽기 후 · 글쓰기", "book": "과학이 어려운 딸에게", "desc": "책 속 과학 원리를 넓혀 탐구 보고서를 써요."}], "kind": "series"}, {"name": "똑똑한국사 1호", "full": "똑똑한국사통사 1호", "aliases": ["똑똑한국사1", "똑똑한국사1호", "똑똑한국사통사1", "똑똑한국사통사1호", "한국사통사1", "한국사통사1호", "통사1", "통사1호", "톡톡한국사1", "톡톡한국사1호"], "sessions": [{"tag": "처음탄탄 한국사 1", "book": "선사 시대와 초기 국가 시대", "desc": "도구의 변화와 단군 신화, 고조선의 법으로 초기 사회를 알아봐요.", "link": "사회 5-2 1단원"}, {"tag": "처음탄탄 한국사 2", "book": "삼국 시대와 남북국 시대", "desc": "삼국과 남북국의 특징, 삼국 통일의 의의와 한계를 생각해요.", "link": "사회 5-2 1단원"}, {"tag": "처음탄탄 한국사 3", "book": "후삼국 시대와 고려 전기", "desc": "고려의 건국과 왕들의 업적, 외세 침입을 살펴봐요.", "link": "사회 5-2 1단원"}, {"tag": "한눈에 보는 역사", "book": "한눈에 보는 역사 마인드맵", "desc": "1~3차시를 마인드맵으로 정리하고 역사 신문을 만들어요.", "link": "사회 5-2 1단원"}], "kind": "series"}, {"name": "똑똑한국사 2호", "full": "똑똑한국사통사 2호", "aliases": ["똑똑한국사2", "똑똑한국사2호", "똑똑한국사통사2", "똑똑한국사통사2호", "한국사통사2", "한국사통사2호", "통사2", "통사2호", "톡톡한국사2", "톡톡한국사2호"], "sessions": [{"tag": "처음탄탄 한국사 4", "book": "고려 후기", "desc": "몽골 침입과 원 간섭기, 공민왕의 개혁을 알아봐요.", "link": "사회 5-2 1단원"}, {"tag": "처음탄탄 한국사 5", "book": "조선 전기", "desc": "조선 건국, 세종의 업적, 임진왜란과 병자호란을 알아봐요.", "link": "사회 5-2 2단원"}, {"tag": "처음탄탄 한국사 6", "book": "조선 후기", "desc": "영조·정조의 개혁과 세도 정치, 사회 변화를 탐구해요.", "link": "사회 5-2 2단원"}, {"tag": "한눈에 보는 역사", "book": "한눈에 보는 역사 마인드맵", "desc": "1~3차시를 마인드맵으로 정리하고 역사 여행 상품 계획서를 만들어요.", "link": "사회 5-2 1·2단원"}], "kind": "series"}, {"name": "똑똑한국사 3호", "full": "똑똑한국사통사 3호", "aliases": ["똑똑한국사3", "똑똑한국사3호", "똑똑한국사통사3", "똑똑한국사통사3호", "한국사통사3", "한국사통사3호", "통사3", "통사3호", "톡톡한국사3", "톡톡한국사3호"], "sessions": [{"tag": "처음탄탄 한국사 7", "book": "개항기", "desc": "강화도 조약 등 개항기 사건을 정리하고 주장하는 글을 써요.", "link": "사회 5-2 2단원"}, {"tag": "처음탄탄 한국사 8", "book": "일제 강점기", "desc": "일제의 통치 방식과 독립운동을 알아보고 인터뷰를 써요.", "link": "사회 5-2 3단원"}, {"tag": "처음탄탄 한국사 9", "book": "현대", "desc": "6·25 전쟁과 민주화 운동 등 현대사를 살펴보고 사진전을 기획해요.", "link": "사회 5-2 3단원 · 사회 6-1 1단원"}, {"tag": "한눈에 보는 역사", "book": "한눈에 보는 역사 마인드맵", "desc": "1~3차시를 마인드맵으로 정리하고 타이포셔너리를 만들어요.", "link": "사회 5-2 2·3단원 · 사회 6-1 1단원"}], "kind": "series"}, {"name": "세계사 1호", "full": "세계사통사 1호", "aliases": ["세계사1", "세계사1호", "세계사통사1", "세계사통사1호"], "sessions": [{"tag": "인류의 탄생과 고대 문명", "book": "한눈에 쏙 세계사 1권", "desc": "도구의 변화에 따른 생활 변화와 고대 문명의 특징을 알아봐요.", "link": "중학교 역사① Ⅱ단원"}, {"tag": "고대 통일 제국", "book": "한눈에 쏙 세계사 2권", "desc": "진·한, 마우리아, 페르시아 등 고대 제국의 공통점을 정리해요.", "link": "중학교 역사① Ⅱ단원"}, {"tag": "지역 문화권의 형성 1", "book": "한눈에 쏙 세계사 3권 (처음~85쪽)", "desc": "이슬람·프랑크·비잔티움 제국과 종교의 영향을 알아봐요.", "link": "중학교 역사① Ⅲ단원"}, {"tag": "지역 문화권의 형성 2", "book": "한눈에 쏙 세계사 3권 (86쪽~끝)", "desc": "인도·중국·몽골 제국의 문화를 살펴보고 문화 지도를 완성해요.", "link": "중학교 역사① Ⅲ·Ⅳ단원"}], "kind": "series"}, {"name": "세계사 2호", "full": "세계사통사 2호", "aliases": ["세계사2", "세계사2호", "세계사통사2", "세계사통사2호"], "sessions": [{"tag": "유럽 사회의 발전 1", "book": "한눈에 쏙 세계사 4권", "desc": "르네상스, 종교 개혁, 신항로 개척 시기의 유럽을 알아봐요.", "link": "중학교 역사① Ⅲ·Ⅳ단원"}, {"tag": "유럽 사회의 발전 2", "book": "한눈에 쏙 세계사 5권", "desc": "신항로 개척 이후의 변화와 과학 혁명·계몽사상을 알아봐요.", "link": "중학교 역사① Ⅳ단원"}, {"tag": "일본 문명의 탄생과 발전", "book": "한눈에 쏙 세계사 6권 (처음~80쪽)", "desc": "일본의 통일 국가 형성과 무사 정권의 특징을 알아봐요.", "link": "중학교 역사① Ⅳ단원"}, {"tag": "중국, 명·청 시대의 발전", "book": "한눈에 쏙 세계사 6권 (81쪽~끝)", "desc": "명과 청의 성립부터 쇠퇴까지, 동서 교류를 알아봐요.", "link": "중학교 역사① Ⅳ단원"}], "kind": "series"}, {"name": "세계사 3호", "full": "세계사통사 3호", "aliases": ["세계사3", "세계사3호", "세계사통사3", "세계사통사3호"], "sessions": [{"tag": "혁명의 시대", "book": "한눈에 쏙 세계사 7권 (처음~87쪽)", "desc": "미국 독립, 산업 혁명, 프랑스 혁명을 알아보고 혁명 사전을 만들어요.", "link": "중학교 역사① Ⅴ단원"}, {"tag": "미국의 발전, 제국주의의 등장", "book": "한눈에 쏙 세계사 7권 (88쪽~끝)", "desc": "제국주의의 배경과 식민지 쟁탈 과정을 알아보고 고발장을 써요.", "link": "중학교 역사① Ⅴ단원"}, {"tag": "제1, 2차 세계 대전", "book": "한눈에 쏙 세계사 8권", "desc": "두 차례 세계 대전의 과정을 정리하며 평화의 소중함을 생각해요.", "link": "중학교 역사① Ⅵ단원"}, {"tag": "냉전의 시작과 현대 세계", "book": "한눈에 쏙 세계사 9권", "desc": "냉전부터 오늘날까지의 흐름을 알아보고 논설문을 써요.", "link": "중학교 역사① Ⅶ단원"}], "kind": "series"}, {"name": "다다어휘 1호", "full": "다다어휘 1호", "aliases": ["다다어휘1", "다다어휘1호", "다다1", "다다1호"], "sessions": [{"tag": "다다어휘", "book": "문어잼 1 헷갈리는 말 (8~47쪽)", "desc": "자주 헷갈리는 낱말의 뜻을 이야기 속에서 익혀요."}, {"tag": "다다어휘", "book": "문어잼 1 헷갈리는 말 (48~83쪽)", "desc": "헷갈리는 낱말을 생활 속 상황에 맞게 써 봐요."}, {"tag": "다다어휘", "book": "문어잼 2 교과서 속 한자어 (8~47쪽)", "desc": "교과서에 자주 나오는 한자어의 뜻을 익혀요."}, {"tag": "다다어휘", "book": "문어잼 2 교과서 속 한자어 (48~83쪽)", "desc": "교과서 속 한자어를 생활 속 상황에 맞게 써 봐요."}], "kind": "series"}, {"name": "다다어휘 2호", "full": "다다어휘 2호", "aliases": ["다다어휘2", "다다어휘2호", "다다2", "다다2호"], "sessions": [{"tag": "다다어휘", "book": "문어잼 교과서 속 관용어 (8~47쪽)", "desc": "관용어의 뜻을 이야기 속에서 익혀요."}, {"tag": "다다어휘", "book": "문어잼 교과서 속 관용어 (48~83쪽)", "desc": "관용어를 생활 속 상황에 맞게 써 봐요."}, {"tag": "다다어휘", "book": "문어잼 교과서 속 속담 (8~47쪽)", "desc": "속담의 뜻을 이야기 속에서 익혀요."}, {"tag": "다다어휘", "book": "문어잼 교과서 속 속담 (48~83쪽)", "desc": "속담을 생활 속 상황에 맞게 써 봐요."}], "kind": "series"}, {"name": "똑독해 1호", "full": "똑독해 1호", "aliases": ["똑독해1", "똑독해1호", "똑똑독해1", "똑똑독해1호"], "sessions": [{"tag": "박학다식 이야기 : 사회", "book": "중심 내용 찾기", "desc": "중심 낱말과 중심 문장을 찾아 글의 중심 내용을 파악해요.", "link": "사회 4-2 2단원"}, {"tag": "박학다식 이야기 : 사회", "book": "사실과 의견 구분하기", "desc": "글에서 사실과 의견을 구분하는 방법을 익혀요.", "link": "사회 4-2 3단원"}, {"tag": "박학다식 이야기 : 사회", "book": "설명 방법 파악하기 1", "desc": "정의와 예시 설명 방법을 익히고 글에서 찾아봐요.", "link": "사회 5-1 3단원"}, {"tag": "박학다식 이야기 : 사회", "book": "의도와 관점 파악하기", "desc": "글쓴이의 의도와 관점을 파악하는 방법을 익혀요.", "link": "사회 6-2 3단원"}], "kind": "series"}, {"name": "똑독해 2호", "full": "똑독해 2호", "aliases": ["똑독해2", "똑독해2호", "똑똑독해2", "똑똑독해2호"], "sessions": [{"tag": "박학다식 이야기 : 과학", "book": "구조 파악하기", "desc": "글의 구조를 파악하며 내용을 바르게 이해해요.", "link": "과학 4-2 2단원"}, {"tag": "박학다식 이야기 : 과학", "book": "추론하기", "desc": "글에 생략된 정보를 짐작하는 방법을 익혀요.", "link": "과학 5-2 3단원"}, {"tag": "박학다식 이야기 : 과학", "book": "설명 방법 파악하기 2", "desc": "비교·대조·인과·분석 설명 방법을 익히고 글에서 찾아봐요.", "link": "과학 6-1 3단원"}, {"tag": "박학다식 이야기 : 과학", "book": "시각 자료 해석하기", "desc": "그래프와 표 등 시각 자료를 해석하는 방법을 알아봐요.", "link": "과학 6-2 3단원"}], "kind": "series"}, {"name": "똑독해 3호", "full": "똑독해 3호", "aliases": ["똑독해3", "똑독해3호", "똑똑독해3", "똑똑독해3호"], "sessions": [{"tag": "박학다식 이야기 : 경제", "book": "질문하기", "desc": "읽기 전·중·후에 알맞은 질문을 하며 읽는 방법을 익혀요.", "link": "사회 4-2 3단원"}, {"tag": "박학다식 이야기 : 경제", "book": "설명 방법 파악하기 3", "desc": "과정·인용·구분·분류 설명 방법을 익히고 글에서 찾아봐요.", "link": "과학 5-2 4단원"}, {"tag": "박학다식 이야기 : 경제", "book": "비판하기", "desc": "글을 비판적으로 읽는 방법을 익혀요.", "link": "사회 6-2 2단원"}, {"tag": "박학다식 이야기 : 경제", "book": "종합하기", "desc": "1~3호에서 익힌 독해 전략을 모두 적용해 실전 문제를 풀어요."}], "kind": "series"}, {"name": "한국사봄 1호", "full": "한국사봄 1호", "aliases": ["한국사봄1", "한국사봄1호", "한국사 봄1"], "sessions": [{"tag": "구석기 시대부터 철기 시대까지", "book": "한국사 열다 1권 (처음~61쪽)", "desc": "도구에 따른 생활 변화와 고조선, 철기 시대 나라들을 알아봐요.", "link": "사회 5-2 1단원 · 중학교 역사② Ⅰ단원"}, {"tag": "삼국의 성립부터 신라의 삼국 통일까지", "book": "한국사 열다 1권 (62쪽~끝)", "desc": "삼국과 가야의 성장, 신라의 삼국 통일 과정을 알아봐요.", "link": "사회 5-2 1단원 · 중학교 역사② Ⅰ·Ⅱ단원"}, {"tag": "남북국 시대부터 고려 전기까지", "book": "한국사 열다 2권 (처음~83쪽)", "desc": "통일 신라와 발해, 고려의 후삼국 통일과 전기 정책을 알아봐요.", "link": "사회 5-2 1단원 · 중학교 역사② Ⅱ·Ⅲ단원"}, {"tag": "혼란했던 시기를 지나 공민왕의 개혁까지", "book": "한국사 열다 2권 (84쪽~끝)", "desc": "무신 정권부터 공민왕의 개혁까지 고려의 변화를 알아봐요.", "link": "사회 5-2 1단원 · 중학교 역사② Ⅲ단원"}], "kind": "series"}, {"name": "한국사봄 2호", "full": "한국사봄 2호", "aliases": ["한국사봄2", "한국사봄2호", "한국사 봄2"], "sessions": [{"tag": "조선이 세워지고 발전하기까지", "book": "한국사 열다 3권 (처음~97쪽)", "desc": "조선 건국부터 사화까지, 나라의 기틀이 잡힌 과정을 알아봐요.", "link": "사회 5-2 2단원 · 중학교 역사② Ⅳ단원"}, {"tag": "왜란과 호란의 아픔을 겪으면서", "book": "한국사 열다 3권 (98쪽~끝)", "desc": "임진왜란과 병자호란의 배경과 전개 과정을 알아봐요.", "link": "사회 5-2 2단원 · 중학교 역사② Ⅳ단원"}, {"tag": "변화를 맞이하는 조선 후기 사회 1", "book": "한국사 열다 4권 (24~67쪽, 84~95쪽)", "desc": "붕당 정치와 영조·정조의 노력, 실학을 알아봐요.", "link": "사회 5-2 2단원 · 중학교 역사② Ⅴ단원"}, {"tag": "변화를 맞이하는 조선 후기 사회 2", "book": "한국사 열다 4권 (처음~21쪽, 70~81쪽, 98쪽~끝)", "desc": "세도 정치와 서민 문화의 성장을 알아봐요.", "link": "사회 5-2 2단원 · 중학교 역사② Ⅴ단원"}], "kind": "series"}, {"name": "한국사봄 3호", "full": "한국사봄 3호", "aliases": ["한국사봄3", "한국사봄3호", "한국사 봄3"], "sessions": [{"tag": "근대 국가 수립을 위한 노력", "book": "한국사 열다 5권 (처음~79쪽)", "desc": "흥선 대원군부터 대한 제국까지 근대 개혁의 의의와 한계를 알아봐요.", "link": "사회 5-2 3단원 · 중학교 역사② Ⅵ단원"}, {"tag": "나라를 되찾기 위한 노력", "book": "한국사 열다 5권 (80쪽~끝)", "desc": "일제의 침략 과정과 독립운동의 의미를 알아봐요.", "link": "사회 5-2 3단원 · 중학교 역사② Ⅵ단원"}, {"tag": "광복부터 6.25 전쟁까지", "book": "한국사 열다 6권 (처음~59쪽)", "desc": "광복 전후 상황과 6.25 전쟁의 전개와 영향을 알아봐요.", "link": "사회 5-2 3단원 · 중학교 역사② Ⅵ단원"}, {"tag": "시련을 딛고 발전하는 대한민국", "book": "한국사 열다 6권 (60쪽~끝)", "desc": "민주주의와 경제 발전, 평화 통일을 위한 노력을 알아봐요.", "link": "사회 5-2 3단원 · 중학교 역사② Ⅵ단원"}], "kind": "series"}, {"name": "별별문학독해 1호", "full": "갈래별주제별문학독해 1호", "aliases": ["별별문학독해1", "별별문학독해1호", "별별문학1", "별별문학1호", "갈래별주제별문학독해1", "갈래별주제별문학독해1호", "별별1", "별별1호"], "sessions": [{"tag": "소설", "book": "오후 4시, 달고나 · 껍질을 벗다", "desc": "소설의 구성 요소를 알고, 인물의 성장을 담아 감상문을 써요.", "link": "중학교 국어 1-2 1단원 · 국어 1-1 4단원"}, {"tag": "시", "book": "햇비 · 3월 · 딱지 외", "desc": "시의 특징과 주제를 이해하고, 감상·비평 글을 써요.", "link": "중학교 국어 1-1 1단원"}, {"tag": "소설", "book": "소나기 · 고무신", "desc": "소재와 복선을 살피며 읽고, 소설의 결말을 새로 써요.", "link": "중학교 국어 1-1 1단원"}, {"tag": "소설과 시", "book": "안내를 부탁합니다 · 연탄 한 장 외", "desc": "같은 주제의 소설과 시를 비교하고, 소설을 시로 바꿔 써요.", "link": "중학교 국어 1-1 1단원 · 국어 1-2 2단원"}], "kind": "series"}, {"name": "별별문학독해 2호", "full": "갈래별주제별문학독해 2호", "aliases": ["별별문학독해2", "별별문학독해2호", "별별문학2", "별별문학2호", "갈래별주제별문학독해2", "갈래별주제별문학독해2호", "별별2", "별별2호"], "sessions": [{"tag": "소설", "book": "하늘은 맑건만 · 먹고 싶다, 수박", "desc": "소설의 갈등을 이해하고, 인물의 행동을 평가하는 논설문을 써요.", "link": "중학교 국어 1-1 4단원"}, {"tag": "수필", "book": "아름다운 흉터 외", "desc": "수필의 특징을 알고, 내 경험을 담은 수필을 써요.", "link": "중학교 국어 1-1 3·4단원"}, {"tag": "소설", "book": "빨간 호리병박 · 촌놈과 떡장수", "desc": "소설의 구성 단계와 인물 관계를 살피고, 인물에게 편지를 써요.", "link": "중학교 국어 1-1 4단원 · 국어 1-2 2단원"}, {"tag": "소설과 수필", "book": "야, 춘기야 외", "desc": "같은 주제의 소설과 수필을 비교하며 독서 일지를 써요.", "link": "중학교 국어 1-1 1단원 · 국어 1-2 1단원"}], "kind": "series"}, {"name": "별별문학독해 3호", "full": "갈래별주제별문학독해 3호", "aliases": ["별별문학독해3", "별별문학독해3호", "별별문학3", "별별문학3호", "갈래별주제별문학독해3", "갈래별주제별문학독해3호", "별별3", "별별3호"], "sessions": [{"tag": "소설", "book": "옥상의 민들레꽃 · 흰 종이수염", "desc": "작품의 배경과 주제를 이해하고, 서평을 써요.", "link": "중학교 국어 1-2 1단원"}, {"tag": "고전", "book": "아기 장수 우투리 · 오늘이 · 홍길동전", "desc": "설화와 고전 소설의 특징을 알고, 민담을 써요.", "link": "중학교 국어 1-1 2·3단원"}, {"tag": "소설", "book": "사랑손님과 어머니 · 영수증", "desc": "서술자와 시점을 이해하고, 장면의 시점을 바꾸어 써요.", "link": "중학교 국어 1-1 1단원 · 국어 1-2 3단원"}, {"tag": "소설과 고전", "book": "나비를 잡는 아버지 · 춘향전 · 소를 줍다", "desc": "같은 주제의 소설과 고전을 비교해 분석하는 글을 써요.", "link": "중학교 국어 1-2 1·2단원"}], "kind": "series"}, {"name": "소크라테스진로 1호", "full": "소크라테스진로독서 1호", "aliases": ["소크라테스진로1", "소크라테스진로1호", "소크라테스진로독서1", "소크라테스진로독서1호", "소진로1", "소진로1호", "진로독서1", "진로독서1호", "소크진로1", "소크진로1호"], "sessions": [{"tag": "진로 토의", "book": "'나'를 알 수 있어요", "desc": "흥미와 적성을 탐색하고, 직업 가치관에 대해 토의해요.", "link": "진로와 직업 Ⅰ단원 · 기술·가정1 Ⅰ단원"}, {"tag": "IB 진로 독서", "book": "조앤 롤링, 스토리텔링의 힘을 보여 줘", "desc": "조앤 롤링의 삶에서 창의성을 탐구하고, 예술형 성향과 나를 연결해요.", "link": "진로와 직업 Ⅰ단원 · 국어 1-2 4단원"}, {"tag": "계열 진로 독서", "book": "열네 살 CEO", "desc": "주인공을 통해 기업형의 특징과 자질을 살펴보고 수행평가를 완성해요.", "link": "진로와 직업 Ⅰ단원 · 도덕1 Ⅰ단원"}, {"tag": "독해 진로 독서", "book": "나눌 수 있어서 행복해요", "desc": "이태석 신부의 삶을 전기문으로 읽고, 독서 감상문을 써요.", "link": "진로와 직업 Ⅰ단원 · 도덕1 Ⅱ단원"}], "kind": "series"}, {"name": "소크라테스진로 2호", "full": "소크라테스진로독서 2호", "aliases": ["소크라테스진로2", "소크라테스진로2호", "소크라테스진로독서2", "소크라테스진로독서2호", "소진로2", "소진로2호", "진로독서2", "진로독서2호", "소크진로2", "소크진로2호"], "sessions": [{"tag": "독해 진로 독서", "book": "계획을 세우고 실천할 거예요", "desc": "벤자민 프랭클린의 자서전을 읽고, 관습형 성향과 나를 연결해 감상문을 써요.", "link": "진로와 직업 Ⅰ단원 · 도덕1 Ⅰ단원"}, {"tag": "IB 진로 독서", "book": "파인만, 과학을 웃겨 주세요", "desc": "리처드 파인만의 삶에서 논리를 탐구하고, 탐구형 성향과 나를 연결해요.", "link": "진로와 직업 Ⅰ단원 · 기술·가정1 6단원"}, {"tag": "계열 진로 독서", "book": "원예반 소년들", "desc": "세 소년의 성장 과정을 정리하고, 실재형 성향을 살펴봐요.", "link": "진로와 직업 Ⅰ단원 · 기술·가정1 Ⅰ단원"}, {"tag": "진로 토의", "book": "'나'의 진로를 계획할 수 있어요", "desc": "다양한 직업 세계를 탐색하고, 진로 로드맵을 작성해요.", "link": "진로와 직업 Ⅳ단원 · 도덕1 Ⅰ단원"}], "kind": "series"}, {"name": "교과문학탐독 1호", "full": "교과문학탐독 1호", "label": "교과·수능", "aliases": ["교과문학탐독1", "교과문학탐독1호", "문학탐독1", "문학탐독1호", "교과문학1", "교과문학1호"], "sessions": [{"tag": "1920년대", "book": "운수 좋은 날 · 탈출기 · 고향", "desc": "하층민의 빈곤한 삶을 비교하며 읽고, 편지를 써요.", "link": "교과서 수록 · 평가원 기출 작품"}, {"tag": "1930년대", "book": "모범 경작생 · 만무방 · 복덕방", "desc": "일제 강점기 농민의 삶을 살펴보고 감상문을 써요.", "link": "교과서 수록 · 평가원 기출 작품"}, {"tag": "1930년대", "book": "김 강사와 T 교수 · 치숙 · 산", "desc": "일제 강점기 지식인의 삶을 살펴보고 뒷이야기를 써요.", "link": "교과서 수록 · 평가원 기출 작품"}, {"tag": "1940년대", "book": "미스터 방 · 두 파산 · 해방 전후", "desc": "해방 전후 혼란한 사회를 살펴보고 인터뷰 글을 써요.", "link": "교과서 수록 · 평가원 기출 작품"}], "kind": "series"}, {"name": "교과문학탐독 2호", "full": "교과문학탐독 2호", "label": "교과·수능", "aliases": ["교과문학탐독2", "교과문학탐독2호", "문학탐독2", "문학탐독2호", "교과문학2", "교과문학2호"], "sessions": [{"tag": "1950~80년대", "book": "비 오는 날 · 사수 · 흰 철쭉 · 유예", "desc": "6·25 전쟁과 분단의 현실을 살펴보고, 작품을 권하는 글을 써요.", "link": "교과서 수록 · 평가원 기출 작품"}, {"tag": "1970~90년대", "book": "큰 산 · 황만근은 이렇게 말했다 · 해산 바가지", "desc": "도시화 속 인간의 모습을 살펴보고 감상문을 써요.", "link": "교과서 수록 · 평가원 기출 작품"}, {"tag": "2000년대 이후", "book": "명랑한 밤길 · 엇박자 D · 도도한 생활", "desc": "다양성과 새로운 관계를 살펴보고, 인물의 마음을 노랫말로 써요.", "link": "교과서 수록 · 평가원 기출 작품"}, {"tag": "2000년대 이후", "book": "노찬성과 에반 · 저건 사람도 아니다 · 뉴욕제과점", "desc": "과학 기술과 인간 소외를 살펴보고 서평을 써요.", "link": "교과서 수록 · 평가원 기출 작품"}], "kind": "series"}, {"name": "한국사람 1호", "full": "한국사람 1호", "aliases": ["한국사람1", "한국사람1호"], "sessions": [{"tag": "한국사 카페 1", "book": "우리 역사가 시작되다", "desc": "선사 시대와 고조선을 알아보고, 고조선 역사 신문을 만들어요.", "link": "중학교 역사② Ⅰ단원"}, {"tag": "한국사 카페 1", "book": "고대 국가가 형성되다", "desc": "삼국과 남북국의 사건과 문화를 살피고, 삼국 통일의 의의를 토론해요.", "link": "중학교 역사② Ⅰ·Ⅱ단원"}, {"tag": "한국사 카페 1", "book": "새로운 통일 왕조, 고려가 서다", "desc": "고려의 주요 사건과 문화를 살피고, 블로그 글을 써요.", "link": "중학교 역사② Ⅲ단원"}, {"tag": "한국사 카페 1", "book": "아침의 나라, 조선이 서다", "desc": "조선 전기를 살피고, 왕권과 신권에 대해 토론해요.", "link": "중학교 역사② Ⅳ단원"}], "kind": "series"}, {"name": "한국사람 2호", "full": "한국사람 2호", "aliases": ["한국사람2", "한국사람2호"], "sessions": [{"tag": "한국사 카페 2", "book": "조선 후기, 변화의 바람이 불다", "desc": "조선 후기 사회 변화를 살피고, 군역 문제를 다룬 상소문을 써요.", "link": "중학교 역사② Ⅴ단원"}, {"tag": "한국사 카페 2", "book": "위기의 조선, 자주와 개화의 갈림길에 서다", "desc": "흥선 대원군부터 갑오개혁까지 살피고, 개화 정책을 토론해요.", "link": "중학교 역사② Ⅵ단원"}, {"tag": "한국사 카페 2", "book": "대한 제국, 제국주의의 소용돌이 속에서 국권을 외치다", "desc": "국권 피탈 과정을 살피고, 철도 건설의 양면성을 토론해요.", "link": "중학교 역사② Ⅵ단원"}, {"tag": "한국사 카페 2", "book": "시대의 아픔을 넘어 통일을 꿈꾸다", "desc": "일제 강점기 민족 운동과 대한민국의 발전 과정을 알아봐요.", "link": "중학교 역사② Ⅵ단원"}], "kind": "series"}, {"name": "교과문학맥잡기 1호", "full": "교과문학맥잡기 1호", "label": "교과·수능", "aliases": ["교과문학맥잡기1", "교과문학맥잡기1호", "맥잡기1", "맥잡기1호", "문학맥잡기1", "문학맥잡기1호"], "sessions": [{"tag": "개화기", "book": "금수회의록", "desc": "신소설과 우화 소설의 특징을 알고, 개방의 현실과 대책을 논술해요.", "link": "교과서 수록 작품 독해 및 논술"}, {"tag": "사실주의 · 신경향파", "book": "운수 좋은 날 · 탈출기", "desc": "사회적 빈곤을 다룬 작품을 읽고, 해결 방안을 논술해요.", "link": "교과서 수록 작품 독해 및 논술"}, {"tag": "자연주의 · 액자 소설", "book": "감자 · 배따라기", "desc": "욕망이 부른 비극을 살피고, 현대인의 삶과 욕망을 논술해요.", "link": "교과서 수록 작품 독해 및 논술"}, {"tag": "농민 문학", "book": "모범 경작생 · 사하촌", "desc": "농민의 자각과 저항을 살피고, 부당한 권력에 맞서는 방식을 논술해요.", "link": "교과서 수록 작품 독해 및 논술"}], "kind": "series"}, {"name": "교과문학맥잡기 2호", "full": "교과문학맥잡기 2호", "label": "교과·수능", "aliases": ["교과문학맥잡기2", "교과문학맥잡기2호", "맥잡기2", "맥잡기2호", "문학맥잡기2", "문학맥잡기2호"], "sessions": [{"tag": "일제 시대 지식인", "book": "김 강사와 T 교수 · 치숙", "desc": "식민지 지식인의 태도를 비판하고, 지식인의 역할을 논술해요.", "link": "교과서 수록 작품 독해 및 논술"}, {"tag": "황금만능 사회", "book": "금 따는 콩밭 · 복덕방", "desc": "1930년대 투기 열풍 속 인물을 살피고, 행복의 조건을 논술해요.", "link": "교과서 수록 작품 독해 및 논술"}, {"tag": "해방 후 사회", "book": "해방 전후 · 미스터 방", "desc": "광복 후 혼란 속 인물을 살피고, 사회 속 삶의 자세를 논술해요.", "link": "교과서 수록 작품 독해 및 논술"}, {"tag": "6·25 전쟁", "book": "비 오는 날 · 유예", "desc": "전쟁의 비극을 분석하고, 폭력의 정당성에 대해 논술해요.", "link": "교과서 수록 작품 독해 및 논술"}], "kind": "series"}, {"name": "소클고등문학 1호", "full": "소클고등문학 1호", "label": "교과·수능", "aliases": ["소클고등문학1", "소클고등문학1호", "소클1", "소클1호", "소크라테스고등문학1", "소크라테스고등문학1호", "고등문학1", "고등문학1호"], "sessions": [{"tag": "교과 개념", "book": "고전 소설: 소대성전 · 운영전 외", "desc": "전기성과 영웅성 등 고전 소설의 핵심 개념을 익혀요.", "link": "교과서 수록 작품 · 수능형 문제"}, {"tag": "문학과의 대화", "book": "구운몽 · 옥루몽", "desc": "성진과 팔선녀의 깨달음 과정을 정리하고 여성 인물을 비교해요.", "link": "교과서 수록 작품 · 수행평가"}, {"tag": "문학과의 대화", "book": "구운몽 · 조신 설화 · 원생몽유록", "desc": "환몽 구조와 주제를 파악하고 작품을 분석해요.", "link": "교과서 수록 작품 · 수능형 문제"}, {"tag": "대입 논·구술", "book": "자유와 책임", "desc": "자유주의와 공동체주의를 익히고 논·구술을 연습해요.", "link": "수능 기출 · 논·구술"}], "kind": "series"}, {"name": "소클고등문학 2호", "full": "소클고등문학 2호", "label": "교과·수능", "aliases": ["소클고등문학2", "소클고등문학2호", "소클2", "소클2호", "소크라테스고등문학2", "소크라테스고등문학2호", "고등문학2", "고등문학2호"], "sessions": [{"tag": "교과 개념", "book": "소설: 인물의 성격과 역할", "desc": "인물의 유형과 심리 변화, 갈등을 파악해 글로 써요.", "link": "교과서 수록 작품 · 수능형 문제"}, {"tag": "문학과의 대화", "book": "태평천하 · 흥보전 · 삼대", "desc": "윤직원 가문의 인물을 정리하고 풍자의 역할을 알아봐요.", "link": "교과서 수록 작품 · 수행평가"}, {"tag": "문학과의 대화", "book": "태평천하", "desc": "가문 몰락의 의미를 살피고 판소리 사설체로 뒷이야기를 써요.", "link": "교과서 수록 작품 · 수능형 문제"}, {"tag": "대입 논·구술", "book": "기술과 인간", "desc": "인터넷·인공지능의 윤리 쟁점과 대처 방안을 논·구술해요.", "link": "수능 기출 · 논·구술"}], "kind": "series"}, {"name": "소클고등문학 3호", "full": "소클고등문학 3호", "label": "교과·수능", "aliases": ["소클고등문학3", "소클고등문학3호", "소클3", "소클3호", "소크라테스고등문학3", "소크라테스고등문학3호", "고등문학3", "고등문학3호"], "sessions": [{"tag": "교과 개념", "book": "소설의 시점: 사랑손님과 어머니 외", "desc": "소설의 시점 원리를 익히고 작품에 적용해요.", "link": "교과서 수록 작품 · 수능형 문제"}, {"tag": "문학과의 대화", "book": "천변풍경 (1~25절)", "desc": "인물과 사건을 정리하고 청계천 탐구 보고서를 써요.", "link": "교과서 수록 작품 · 수행평가"}, {"tag": "문학과의 대화", "book": "천변풍경 (26~50절)", "desc": "공간의 역할과 작가의 의도를 살피고 작품을 평가해요.", "link": "교과서 수록 작품 · 수능형 문제"}, {"tag": "대입 논·구술", "book": "세계화", "desc": "세계화의 긍정·부정 측면을 읽고 논·구술해요.", "link": "수능 기출 · 논·구술"}], "kind": "series"}, {"name": "소클고등문학 4호", "full": "소클고등문학 4호", "label": "교과·수능", "aliases": ["소클고등문학4", "소클고등문학4호", "소클4", "소클4호", "소크라테스고등문학4", "소크라테스고등문학4호", "고등문학4", "고등문학4호"], "sessions": [{"tag": "교과 개념", "book": "소설의 구성", "desc": "구성 단계와 인과 관계를 분석하고 주제와의 관계를 글로 써요.", "link": "교과서 수록 작품 · 수능형 문제"}, {"tag": "문학과의 대화", "book": "앵무새 죽이기", "desc": "인물과 사건을 정리하고 이미지 카드로 책을 소개해요.", "link": "교과서 수록 작품 · 수행평가"}, {"tag": "문학과의 대화", "book": "앵무새 죽이기", "desc": "앵무새의 상징으로 주제를 이해하고 작품의 가치를 평가해요.", "link": "교과서 수록 작품 · 수능형 문제"}, {"tag": "대입 논·구술", "book": "민주주의와 시민", "desc": "민주주의와 시민의 개념을 익히고 논·구술을 연습해요.", "link": "수능 기출 · 논·구술"}], "kind": "series"}, {"name": "소클고등문학 5호", "full": "소클고등문학 5호", "label": "교과·수능", "aliases": ["소클고등문학5", "소클고등문학5호", "소클5", "소클5호", "소크라테스고등문학5", "소크라테스고등문학5호", "고등문학5", "고등문학5호"], "sessions": [{"tag": "교과 개념", "book": "소설의 서술 방식: 큰 산 · 사평역 외", "desc": "서술·묘사·대화의 차이와 서술자 개입의 효과를 익혀요.", "link": "교과서 수록 작품 · 수능형 문제"}, {"tag": "문학과의 대화", "book": "그 많던 싱아는 누가 다 먹었을까", "desc": "'나'의 공간 이동을 따라 정리하고 나의 '그날'을 묘사해요.", "link": "교과서 수록 작품 · 수행평가"}, {"tag": "문학과의 대화", "book": "그 많던 싱아는 누가 다 먹었을까", "desc": "'나'의 성장과 우정을 살피고 서평을 써요.", "link": "교과서 수록 작품 · 수능형 문제"}, {"tag": "대입 논·구술", "book": "매체와 대중문화", "desc": "매체의 영향과 대중문화를 향유하는 태도를 논·구술해요.", "link": "수능 기출 · 논·구술"}], "kind": "series"}, {"name": "소클고등문학 6호", "full": "소클고등문학 6호", "label": "교과·수능", "aliases": ["소클고등문학6", "소클고등문학6호", "소클6", "소클6호", "소크라테스고등문학6", "소크라테스고등문학6호", "고등문학6", "고등문학6호"], "sessions": [{"tag": "교과 개념", "book": "소설의 갈등: 날개 · 삼포 가는 길 외", "desc": "갈등의 개념을 익히고 작품에 적용해요.", "link": "교과서 수록 작품 · 수능형 문제"}, {"tag": "문학과의 대화", "book": "광장 · 구운몽", "desc": "구운몽의 서사 구조를 정리하고 두 작품을 비교해요.", "link": "교과서 수록 작품 · 수행평가"}, {"tag": "문학과의 대화", "book": "광장 · 구운몽", "desc": "현실과 이상을 다룬 두 작품을 비교하며 서평을 써요.", "link": "교과서 수록 작품 · 수능형 문제"}, {"tag": "대입 논·구술", "book": "자연과 인간", "desc": "자연과 인간의 관계에 관한 제시문으로 논·구술을 준비해요.", "link": "수능 기출 · 논·구술"}], "kind": "series"}, {"name": "소클고등문학 7호", "full": "소클고등문학 7호", "label": "교과·수능", "aliases": ["소클고등문학7", "소클고등문학7호", "소클7", "소클7호", "소크라테스고등문학7", "소크라테스고등문학7호", "고등문학7", "고등문학7호"], "sessions": [{"tag": "교과 개념", "book": "배경·소재·표현: 도요새에 관한 명상 외", "desc": "배경·소재·표현의 개념을 익히고 작품에 적용해요.", "link": "교과서 수록 작품 · 수능형 문제"}, {"tag": "문학과의 대화", "book": "관촌수필", "desc": "연작별 내용을 정리하고 문체의 특징을 비교해요.", "link": "교과서 수록 작품 · 수행평가"}, {"tag": "문학과의 대화", "book": "관촌수필", "desc": "제목에 담긴 뜻을 생각하며 서평을 써요.", "link": "교과서 수록 작품 · 수능형 문제"}, {"tag": "대입 논·구술", "book": "경제 주체의 역할과 불평등", "desc": "분배 구조와 불평등을 이해하고 논·구술을 준비해요.", "link": "수능 기출 · 논·구술"}], "kind": "series"}, {"name": "소클고등문학 8호", "full": "소클고등문학 8호", "label": "교과·수능", "aliases": ["소클고등문학8", "소클고등문학8호", "소클8", "소클8호", "소크라테스고등문학8", "소크라테스고등문학8호", "고등문학8", "고등문학8호"], "sessions": [{"tag": "교과 개념", "book": "고전 시가 Ⅰ: 제망매가 · 청산별곡 외", "desc": "고대 가요부터 경기체가까지 고전 시가의 특징을 익혀요.", "link": "교과서 수록 작품 · 수능형 문제"}, {"tag": "문학과의 대화", "book": "1984", "desc": "사회 체제와 주인공의 저항을 정리하고 연극 대본을 써요.", "link": "교과서 수록 작품 · 수행평가"}, {"tag": "문학과의 대화", "book": "1984", "desc": "작품의 상징과 작가의 비판 의도를 분석해요.", "link": "교과서 수록 작품 · 수능형 문제"}, {"tag": "대입 논·구술", "book": "역사와 기억", "desc": "역사를 기억하는 의미에 대해 논·구술을 준비해요.", "link": "수능 기출 · 논·구술"}], "kind": "series"}, {"name": "소클고등문학 9호", "full": "소클고등문학 9호", "label": "교과·수능", "aliases": ["소클고등문학9", "소클고등문학9호", "소클9", "소클9호", "소크라테스고등문학9", "소크라테스고등문학9호", "고등문학9", "고등문학9호"], "sessions": [{"tag": "교과 개념", "book": "고전 시가 Ⅱ: 강호사시가 · 누항사 외", "desc": "시조와 가사 등 고전 시가의 개념을 익혀요.", "link": "교과서 수록 작품 · 수능형 문제"}, {"tag": "문학과의 대화", "book": "황혼의 집 · 땔감 외", "desc": "전쟁과 분단을 다룬 작품을 읽고 인물 인터뷰 기사를 써요.", "link": "교과서 수록 작품 · 수행평가"}, {"tag": "문학과의 대화", "book": "아홉 켤레의 구두로 남은 사내 외", "desc": "산업화 속 소시민의 삶을 살피고 비평문을 써요.", "link": "교과서 수록 작품 · 수능형 문제"}, {"tag": "대입 논·구술", "book": "삶의 태도", "desc": "공동체 속 타자와 함께 사는 의미를 논·구술해요.", "link": "수능 기출 · 논·구술"}], "kind": "series"}, {"name": "소클고등문학 10호", "full": "소클고등문학 10호", "label": "교과·수능", "aliases": ["소클고등문학10", "소클고등문학10호", "소클10", "소클10호", "소크라테스고등문학10", "소크라테스고등문학10호", "고등문학10", "고등문학10호"], "sessions": [{"tag": "교과 개념", "book": "현대시 Ⅰ: 산유화 · 청포도 외", "desc": "시어, 심상, 표현 기법, 운율을 익히고 작품에 적용해요.", "link": "교과서 수록 작품 · 수능형 문제"}, {"tag": "문학과의 대화", "book": "원미동 사람들 (1)", "desc": "소시민의 삶을 다룬 연작을 정리하고 답사 후기를 써요.", "link": "교과서 수록 작품 · 수행평가"}, {"tag": "문학과의 대화", "book": "원미동 사람들 (2)", "desc": "연작의 주제를 깊이 살피고 비평문을 써요.", "link": "교과서 수록 작품 · 수능형 문제"}, {"tag": "대입 논·구술", "book": "디지털 시대의 학습", "desc": "인공지능과 디지털 시대의 독서·문해력을 논·구술해요.", "link": "수능 기출 · 논·구술"}], "kind": "series"}, {"name": "소클고등문학 11호", "full": "소클고등문학 11호", "label": "교과·수능", "aliases": ["소클고등문학11", "소클고등문학11호", "소클11", "소클11호", "소크라테스고등문학11", "소크라테스고등문학11호", "고등문학11", "고등문학11호"], "sessions": [{"tag": "교과 개념", "book": "현대시 Ⅱ: 님의 침묵 · 참회록 외", "desc": "화자와 시상 전개를 익히고 감상·비평 글을 써요.", "link": "교과서 수록 작품 · 수능형 문제"}, {"tag": "문학과의 대화", "book": "걸리버 여행기 (1·2부)", "desc": "1·2부를 정리하고 릴리퍼트와 브롭딩낵을 비교해요.", "link": "교과서 수록 작품 · 수행평가"}, {"tag": "문학과의 대화", "book": "걸리버 여행기 (3·4부)", "desc": "인간에 대한 풍자를 살피고 비평글을 써요.", "link": "교과서 수록 작품 · 수능형 문제"}, {"tag": "대입 논·구술", "book": "과학기술과 윤리", "desc": "유전자 가위 기술의 찬반과 국가의 역할을 논·구술해요.", "link": "수능 기출 · 논·구술"}], "kind": "series"}, {"name": "소클고등문학 12호", "full": "소클고등문학 12호", "label": "교과·수능", "aliases": ["소클고등문학12", "소클고등문학12호", "소클12", "소클12호", "소크라테스고등문학12", "소크라테스고등문학12호", "고등문학12", "고등문학12호"], "sessions": [{"tag": "교과 개념", "book": "극·수필: 제향날 · 오발탄 외", "desc": "극과 수필의 개념을 익히고 작품에 적용해요.", "link": "교과서 수록 작품 · 수능형 문제"}, {"tag": "문학과의 대화", "book": "알 · 파수꾼 · 결혼", "desc": "이강백 희곡의 알레고리와 풍자를 살피고 연출 노트를 써요.", "link": "교과서 수록 작품 · 수행평가"}, {"tag": "문학과의 대화", "book": "불모지 · 성난 기계", "desc": "세대 갈등과 가족 해체를 다룬 희곡을 읽고 비평문을 써요.", "link": "교과서 수록 작품 · 수능형 문제"}, {"tag": "대입 논·구술", "book": "예술의 본질과 감상", "desc": "AI 예술과 예술가의 역할에 대해 논·구술해요.", "link": "수능 기출 · 논·구술"}], "kind": "series"}, {"name": "소클고등통합사회 1호", "full": "소클고등통합사회 1호", "aliases": ["소클고등통합사회1", "소클고등통합사회1호", "고등통합사회1", "고등통합사회1호", "통합사회1", "통합사회1호", "소클통합사회1", "소클통합사회1호", "소크라테스고등통합사회1", "소크라테스고등통합사회1호"], "sessions": [{"tag": "통합사회 별책 1", "book": "통합적 관점 · 인간, 사회, 환경과 행복", "desc": "통합적 관점과 행복의 의미를 사례로 익혀요.", "link": "통합사회1 Ⅰ·Ⅱ단원"}, {"tag": "통합사회 별책 1", "book": "자연환경과 인간", "desc": "자연환경이 생활에 주는 영향과 생태 시민의 자세를 알아봐요.", "link": "통합사회1 Ⅲ단원"}, {"tag": "통합사회 별책 1", "book": "생활공간과 사회", "desc": "산업화·도시화로 달라진 생활공간과 문제 해결 방안을 찾아요.", "link": "통합사회1 Ⅴ단원"}, {"tag": "통합사회 독서", "book": "별난 사회 선생님의 한국 지리네요", "desc": "한국의 자연·인문환경을 살펴보고 종합 글쓰기를 해요.", "link": "통합사회1 Ⅲ·Ⅴ단원 · 논술"}], "kind": "series"}, {"name": "소클고등통합사회 2호", "full": "소클고등통합사회 2호", "aliases": ["소클고등통합사회2", "소클고등통합사회2호", "고등통합사회2", "고등통합사회2호", "통합사회2", "통합사회2호", "소클통합사회2", "소클통합사회2호", "소크라테스고등통합사회2", "소크라테스고등통합사회2호"], "sessions": [{"tag": "통합사회 별책 2", "book": "사회 정의와 불평등", "desc": "불평등 사례의 원인을 분석하고 복지 제도 등 해결 방안을 살펴봐요.", "link": "통합사회2 Ⅱ단원"}, {"tag": "통합사회 별책 2", "book": "시장경제와 지속 가능 발전", "desc": "시장경제의 문제, 금융 의사 결정, 국제 무역을 탐구해요.", "link": "통합사회2 Ⅲ단원"}, {"tag": "통합사회 별책 2", "book": "세계화와 평화", "desc": "세계화의 문제와 평화의 관점으로 갈등 해결 방안을 찾아요.", "link": "통합사회2 Ⅳ단원"}, {"tag": "통합사회 독서", "book": "경제학이 그렇게 어려운가요?", "desc": "경제 시스템의 변화와 명암을 이해하고 종합 글쓰기를 해요.", "link": "통합사회2 Ⅲ·Ⅳ단원 · 논술"}], "kind": "series"}, {"name": "소클고등통합사회 3호", "full": "소클고등통합사회 3호", "aliases": ["소클고등통합사회3", "소클고등통합사회3호", "고등통합사회3", "고등통합사회3호", "통합사회3", "통합사회3호", "소클통합사회3", "소클통합사회3호", "소크라테스고등통합사회3", "소크라테스고등통합사회3호"], "sessions": [{"tag": "통합사회 별책 3", "book": "문화와 다양성", "desc": "문화 상대주의를 이해하고 다문화 사회의 갈등 해결 방안을 찾아요.", "link": "통합사회1 Ⅳ단원"}, {"tag": "통합사회 별책 3", "book": "인권 보장과 헌법", "desc": "인권의 의미 변화와 헌법상 제도를 알아봐요.", "link": "통합사회2 Ⅰ단원"}, {"tag": "통합사회 별책 3", "book": "미래와 지속 가능한 삶", "desc": "인구, 에너지, 기후 변화 문제와 세계 시민의 태도를 생각해요.", "link": "통합사회2 Ⅴ단원"}, {"tag": "통합사회 독서", "book": "멋진 신세계", "desc": "과학 기술과 인간 존엄성에 대해 논술로 정리해요.", "link": "통합사회2 Ⅰ·Ⅴ단원 · 논술"}], "kind": "series"}]}</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script>
+/*__LOGIC_START__*/
+const COLORS = ["#1f2a4a", "#e07a3f", "#2f8f6b"];
+const WD = "일월화수목금토";
+const norm = s => String(s ?? "").normalize("NFKC").replace(/\s+/g, "").toLowerCase();
+
+function matchCourse(stage, catalog) {
+  const n = norm(stage);
+  if (!n) return -1;
+  let i = catalog.courses.findIndex(c => c.aliases.some(a => norm(a) === n) || norm(c.name) === n);
+  if (i >= 0) return i;
+  const loose = s => norm(s).replace(/단계/g, "").replace(/호$/, "");
+  const l = loose(stage);
+  return catalog.courses.findIndex(c => c.aliases.some(a => loose(a) === l) || loose(c.name) === l);
+}
+
+function parseDates(text, baseYear, baseMonth) {
+  const out = [];
+  let m = null, y = baseYear, prevM = null;
+  const re = /(?:(\d{1,2})\s*월\s*)?(\d{1,2})\s*일|(\d{1,2})\s*[\/.]\s*(\d{1,2})/g;
+  let t;
+  const s = String(text ?? "");
+  while ((t = re.exec(s))) {
+    let mm, dd;
+    if (t[2]) { mm = t[1] ? +t[1] : m; dd = +t[2]; } else { mm = +t[3]; dd = +t[4]; }
+    if (!mm) continue;
+    if (prevM === null) { y = (baseMonth >= 11 && mm <= 2) ? baseYear + 1 : (baseMonth <= 2 && mm >= 11 ? baseYear - 1 : baseYear); }
+    else if (mm < prevM) y += 1;
+    prevM = mm; m = mm;
+    out.push({ y, m: mm, d: dd });
+  }
+  return out;
+}
+
+function cleanTime(t) {
+  return String(t ?? "").replace(/~+/g, "~").split(/\r?\n|,(?=\s*[월화수목금토일])/).map(x => x.trim()).filter(Boolean).join(" · ");
+}
+
+/* rows: array of arrays (merged cells already filled). Returns groups. */
+function groupRows(rows) {
+  const hi = rows.findIndex(r => r.some(c => norm(c) === "이름") && r.some(c => norm(c) === "단계"));
+  if (hi < 0) throw new Error("엑셀 첫 줄에서 '이름'과 '단계' 칸을 찾지 못했어요.");
+  const H = rows[hi].map(norm);
+  const col = k => H.findIndex(h => h === k || h.startsWith(k));
+  const cNo = col("no"), cTeam = col("팀여부"), cMemo = ["특이사항", "특이", "비고", "인사말", "메모", "전달사항", "참고사항", "기타"].map(col).find(i => i >= 0) ?? -1, cName = col("이름"), cTime = col("수업요일"), cStage = col("단계"), cDate = col("수업일");
+  const groups = []; let cur = null;
+  for (const r of rows.slice(hi + 1)) {
+    const name = String(r[cName] ?? "").trim(), stage = String(r[cStage] ?? "").trim(), dates = String(r[cDate] ?? "").trim();
+    const no = cNo >= 0 ? String(r[cNo] ?? "").trim() : "";
+    const memoOnly = cMemo >= 0 ? String(r[cMemo] ?? "").trim() : "";
+    if (!name && !stage && !dates) { if (cur && memoOnly && !cur.memo) cur.memo = memoOnly; continue; }
+    const team = cTeam >= 0 ? norm(r[cTeam]) : "";
+    /* 같은 반 = No가 같은 줄. No가 비어 있으면 앞 반에 이어지되, '개인'으로 적힌 새 수업 줄은 따로 나눠요. */
+    let same;
+    if (!cur) same = false;
+    else if (cNo >= 0 && no) same = no === cur.no;
+    else if (!stage && !dates) same = true;
+    else same = !team.includes("개인");
+    /* 팀 이름(예: 목요일 1팀)이 바뀌거나 수업요일이 다르면 No가 같거나 비어 있어도 다른 반으로 나눠요. */
+    if (same && cur) {
+      const isTeamLabel = s => /팀\d*(\(\d+명\))?$/.test(norm(s));
+      const t = cTime >= 0 ? cleanTime(r[cTime]) : "";
+      if (name && isTeamLabel(name) && cur.names.some(isTeamLabel) && !cur.names.includes(name)) same = false;
+      else if (stage && t && cur.time && norm(t) !== norm(cur.time)) same = false;
+    }
+    if (!same) { cur = { no, names: [], time: "", memo: "", segs: [] }; groups.push(cur); }
+    if (name && !cur.names.includes(name)) cur.names.push(name);
+    if (!cur.time && cTime >= 0 && r[cTime]) cur.time = cleanTime(r[cTime]);
+    if (!cur.memo && cMemo >= 0 && String(r[cMemo] ?? "").trim()) cur.memo = String(r[cMemo]).trim();
+    if (stage || dates) {
+      const key = norm(stage) + "|" + norm(dates);
+      if (!cur.segs.some(s => s.key === key)) cur.segs.push({ key, stage, dates });
+    }
+  }
+  const out = groups.filter(g => g.segs.length);
+  out.noMemoCol = cMemo < 0;
+  return out;
+}
+
+function defaultMsg(mLabel) {
+  return "안녕하세요 한우리입니다.\n" + mLabel + " 수업계획서입니다.\n확인 부탁드립니다. 감사합니다^^";
+}
+
+function buildClass(g, catalog) {
+  const segs = g.segs.map(s => ({ stage: s.stage, datesText: s.dates, course: s.course ?? matchCourse(s.stage, catalog),
+    dates: parseDates(s.dates, catalog.year, catalog.month) }));
+  return { names: g.names, time: g.time, memo: g.memo || "", segs, title: null };
+}
+
+function classView(c, catalog) {
+  const multi = c.segs.length > 1;
+  const rows = [];
+  c.segs.forEach((s, si) => {
+    const course = catalog.courses[s.course];
+    const cname = course ? course.name : (s.stage || "과정");
+    s.dates.slice().sort((a, b) => new Date(a.y, a.m - 1, a.d) - new Date(b.y, b.m - 1, b.d)).forEach((dt, i) => {
+      const se = course && course.sessions[i];
+      rows.push({ ...dt, color: COLORS[si % COLORS.length], course: cname, no: (i + 1) + "차시",
+        label: course ? (course.label || "교과연계") : "교과연계",
+        tag: se ? se.tag : "", book: se ? se.book : null, desc: se ? se.desc : "", link: se ? se.link : "" });
+    });
+  });
+  rows.sort((a, b) => new Date(a.y, a.m - 1, a.d) - new Date(b.y, b.m - 1, b.d));
+  rows.forEach(r => { r.wd = WD[new Date(r.y, r.m - 1, r.d).getDay()]; r.lab = multi ? r.course + " " + r.no : r.no; });
+  const months = [...new Map(rows.map(r => [r.y * 100 + r.m, [r.y, r.m]])).values()];
+  const mLabel = months.length ? (months.length === 1 ? months[0][1] + "월" : months[0][1] + "월~" + months[months.length - 1][1] + "월") : "";
+  const year = months.length ? months[0][0] : catalog.year;
+  const courseNames = c.segs.map(s => catalog.courses[s.course]?.name || s.stage);
+  const title = c.title ?? (courseNames.join(", ") + " 수업계획서");
+  const legend = multi ? c.segs.map((s, si) => ({ name: courseNames[si], color: COLORS[si % COLORS.length] })) : [];
+  const missing = c.segs.filter(s => s.course < 0).map(s => s.stage);
+  const extra = c.segs.filter(s => s.course >= 0 && s.dates.length > catalog.courses[s.course].sessions.length).map(s => catalog.courses[s.course].name);
+  const noDates = c.segs.filter(s => !s.dates.length).map(s => s.stage);
+  return { rows, months, mLabel, year, title, legend, missing, extra, noDates,
+    sub: year + "년 " + mLabel, time: c.time,
+    msgText: c.memo || defaultMsg(mLabel),
+    msg: (c.memo || defaultMsg(mLabel)).replace(/[&<>"]/g, ch => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[ch])).replace(/\r?\n/g, "<br>"),
+    file: (mLabel + "_수업계획서_" + (c.names.join("_") || courseNames.join("_"))).normalize("NFKC").replace(/[\\/:*?"<>|\s]+/g, "_") + ".png" };
+}
+/*__LOGIC_END__*/
+
+const esc = s => String(s ?? "").replace(/[&<>"]/g, ch => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[ch]));
+const CATALOG = JSON.parse(document.getElementById("catalog").textContent);
+
+function monthHTML(y, m, rows) {
+  const marks = {}; rows.filter(r => r.y === y && r.m === m).forEach(r => marks[r.d] = r);
+  const first = new Date(y, m - 1, 1).getDay(), days = new Date(y, m, 0).getDate();
+  let h = '<div class="mon">' + y + "년 " + m + '월</div><div class="grid">';
+  h += [...WD].map((w, i) => '<div class="wd ' + (i === 0 ? "sun" : i === 6 ? "sat" : "") + '">' + w + "</div>").join("");
+  for (let i = 0; i < first; i++) h += '<div class="cell"></div>';
+  for (let d = 1; d <= days; d++) {
+    const wi = (first + d - 1) % 7, wc = wi === 0 ? "sun" : wi === 6 ? "sat" : "", r = marks[d];
+    h += r ? '<div class="cell on ' + wc + '"><div class="num" style="background:' + r.color + '">' + d + '</div><div class="lab" style="color:' + r.color + '">' + esc(r.lab) + "</div></div>"
+           : '<div class="cell ' + wc + '"><div class="num">' + d + "</div></div>";
+  }
+  return h + "</div>";
+}
+
+function sheetHTML(v) {
+  const legend = v.legend.length ? '<div class="legend">' + v.legend.map(l => '<span><i style="background:' + l.color + '"></i>' + esc(l.name) + "</span>").join("") + "</div>" : "";
+  const cals = v.months.map(([y, m]) => '<div class="box">' + monthHTML(y, m, v.rows) + legend + "</div>").join("");
+  const cards = v.rows.map((r, i) => {
+    const lnk = r.link ? '<div class="lnk"><b>' + esc(r.label) + '</b><span class="ed" data-ed="교과연계">' + esc(r.link) + "</span></div>" : "";
+    const tag = r.tag ? '<b class="ed" data-ed="수업 주제">' + esc(r.tag) + "</b>" : "";
+    const book = r.book ? '<div class="book ed" data-ed="필독서">' + esc(r.book) + "</div>" : '<div class="book none ed" data-ed="필독서">책 정보 없음</div>';
+    return '<div class="card"><div class="badge" style="background:' + r.color + '">' + (i + 1) + '</div><div>' +
+      '<div class="meta">' + r.m + "월 " + r.d + "일(" + r.wd + ") · " + esc(r.lab) + tag + "</div>" + book +
+      (r.desc ? '<div class="desc ed" data-ed="한 줄 소개">' + esc(r.desc) + "</div>" : "") + lnk + "</div></div>";
+  }).join("");
+  const size = v.title.length <= 11 ? 84 : (v.title.length <= 16 ? 70 : 58);
+  return '<div class="sheet"><div class="bar1"></div><div class="wrap"><div class="hello ed" data-ed="위쪽 날짜">' + esc(v.sub) + '</div><h1 class="ed" data-ed="제목" style="font-size:' + size + 'px">' + esc(v.title) + "</h1>" +
+    '<div class="time"><span>수업시간</span><em class="ed" data-ed="수업시간">' + esc(v.time || " ") + "</em></div>" +
+    cals + '<div class="sec">차시별 필독서</div>' + cards + '<div class="msg ed" data-ed="인사말">' + v.msg + "</div></div>" + '<div class="bar2"></div></div>';
+}
+
+let fontsReady = null;
+function loadFonts() {
+  if (!fontsReady) fontsReady = Promise.all(["400", "700", "900"].map(w => document.fonts.load(w + ' 30px "Noto Sans KR"', "가나다")).concat(document.fonts.ready)).catch(() => {});
+  return fontsReady;
+}
+
+let queue = Promise.resolve();
+function capture(idx) {
+  queue = queue.then(async () => {
+    await loadFonts();
+    const stage = document.getElementById("stage");
+    const src = document.querySelector("#live-" + idx + " .sheet");
+    if (!src) throw new Error("no sheet");
+    const el = src.cloneNode(true);
+    el.querySelectorAll(".editing").forEach(x => x.classList.remove("editing"));
+    stage.innerHTML = ""; stage.appendChild(el);
+    const canvas = await html2canvas(el, { scale: 1.5, backgroundColor: "#f4f6fa", logging: false, windowWidth: 1200 });
+    stage.innerHTML = "";
+    return await new Promise(res => canvas.toBlob(res, "image/png"));
+  });
+  return queue;
+}
+
+let downloads = null;
+(async () => { try { downloads = await window.claude?.use?.("downloads"); } catch (e) { downloads = null; } refreshSaveButtons(); })();
+function refreshSaveButtons() {
+  document.querySelectorAll("[data-save]").forEach(b => { const c = state.classes[+b.dataset.save]; b.hidden = !(c && c.blob); });
+  document.getElementById("saveAll").hidden = !downloads || !state.classes.length || state.example;
+}
+async function saveBlob(filename, blob, btn, idx) {
+  if (!downloads) { if (idx !== undefined) openViewer(idx); return; }
+  const old = btn.textContent; btn.disabled = true;
+  try { await downloads.save({ filename, data: blob }); btn.textContent = "저장했어요"; }
+  catch (e) {
+    btn.textContent = old;
+    if (!(e && e.code === "declined") && idx !== undefined) openViewer(idx);
+  }
+  setTimeout(() => { btn.textContent = old; btn.disabled = false; }, 1800);
+}
+
+/* 저장 기능을 쓸 수 없는 화면(로그인 안 함 등)에서는 이미지를 크게 띄워 길게 눌러 저장하게 해요. */
+function openViewer(idx) {
+  const c = state.classes[idx]; if (!c || !c.dataUrl) return;
+  const v = document.getElementById("viewer");
+  document.getElementById("viewerImg").src = c.dataUrl;
+  v.hidden = false; document.body.style.overflow = "hidden";
+  document.getElementById("viewerClose").focus();
+}
+function closeViewer() { document.getElementById("viewer").hidden = true; document.body.style.overflow = ""; }
+
+const state = { classes: [], example: true };
+
+function courseOptions(sel) {
+  return '<option value="-1"' + (sel < 0 ? " selected" : "") + ">과정을 골라 주세요</option>" +
+    [["monthly", CATALOG.month + "월 과정"], ["series", "호별 과정"]].map(([k, lab]) => '<optgroup label="' + lab + '">' +
+      CATALOG.courses.map((c, i) => c.kind === k ? '<option value="' + i + '"' + (i === sel ? " selected" : "") + ">" + esc(c.name) + (c.full !== c.name ? " (" + esc(c.full) + ")" : "") + "</option>" : "").join("") + "</optgroup>").join("");
+}
+
+function panelHTML(c, idx) {
+  const v = classView(c, CATALOG);
+  c.file = v.file;
+  const warns = [];
+  if (v.missing.length) warns.push("'" + v.missing.join("', '") + "' 단계와 맞는 과정을 찾지 못했어요. 아래에서 과정을 골라 주세요.");
+  if (v.extra.length) warns.push(v.extra.join(", ") + " 수업일이 계획안 차시보다 많아요. 넘치는 날은 '책 정보 없음'으로 나와요.");
+  if (v.noDates.length) warns.push("'" + v.noDates.join("', '") + "' 줄의 수업일을 읽지 못했어요. '11월 4일, 11일'처럼 적어 주세요.");
+  const segs = c.segs.map((s, si) => '<div class="seg"><div class="dates"><b>' + esc(s.stage || "단계 없음") + "</b><br>" + (s.dates.map(d => d.m + "/" + d.d).join(", ") || "수업일 없음") + "</div>" +
+    '<label for="crs-' + idx + "-" + si + '">과정<select id="crs-' + idx + "-" + si + '" data-i="' + idx + '" data-s="' + si + '">' + courseOptions(s.course) + "</select></label></div>").join("");
+  return '<article class="panel" id="cls-' + idx + '" style="padding:16px">' +
+    '<div class="cls-head"><h3>' + esc(c.names.join(", ") || "이름 없음") + "</h3>" + (state.example ? '<span class="tag">예시</span>' : '<span class="tag">' + esc(v.mLabel) + "</span>") + "</div>" +
+    warns.map(w => '<div class="warn">' + esc(w) + "</div>").join("") +
+    '<div class="segs">' + segs + "</div>" +
+    '<p class="hint">점선으로 표시된 글자를 누르면 고칠 수 있어요.</p>' +
+    '<div class="editor" id="ed-' + idx + '" hidden><label for="edt-' + idx + '"><span id="edl-' + idx + '">고치는 중</span><textarea id="edt-' + idx + '" data-edit="' + idx + '" rows="3"></textarea></label>' +
+    '<button type="button" class="ghost" data-done="' + idx + '">다 고쳤어요</button></div>' +
+    '<div class="live" id="live-' + idx + '"><div class="scaler">' + sheetHTML(v) + "</div></div>" +
+    '<div class="bar"><span class="hint">' + esc(v.file) + '</span><span class="btns"><button type="button" data-make="' + idx + '">이미지로 만들기</button>' +
+    '<button type="button" class="ghost" data-save="' + idx + '" hidden>이미지 저장</button></span></div>' +
+    '<div class="shot" id="shot-' + idx + '" hidden></div></article>';
+}
+
+function fit(idx) {
+  const live = document.getElementById("live-" + idx); if (!live) return;
+  const sc = live.firstElementChild, s = live.clientWidth / 1200;
+  sc.style.transform = "scale(" + s + ")";
+  live.style.height = Math.ceil(sc.offsetHeight * s) + "px";
+}
+function fitAll() { state.classes.forEach((_, i) => fit(i)); }
+window.addEventListener("resize", fitAll);
+
+function markStale(idx) {
+  const c = state.classes[idx]; if (!c) return;
+  c.blob = null;
+  c.dataUrl = null;
+  const shot = document.getElementById("shot-" + idx);
+  if (shot) { shot.hidden = true; shot.innerHTML = ""; }
+  refreshSaveButtons();
+}
+
+async function makeImage(idx) {
+  const c = state.classes[idx];
+  const shot = document.getElementById("shot-" + idx);
+  shot.hidden = false; shot.innerHTML = '<div class="wait">이미지 만드는 중…</div>';
+  try {
+    const blob = await capture(idx);
+    c.blob = blob;
+    c.dataUrl = await new Promise(res => { const fr = new FileReader(); fr.onload = () => res(fr.result); fr.readAsDataURL(blob); });
+    shot.innerHTML = '<p class="hint">완성된 이미지예요. "이미지 저장"을 누르거나, 이미지를 길게 눌러 저장하세요.</p><img alt="' + esc(c.names.join(", ")) + ' 수업계획서 이미지" src="' + c.dataUrl + '">';
+  } catch (e) {
+    shot.innerHTML = '<div class="wait">이미지를 만들지 못했어요. 페이지를 새로 고친 뒤 다시 해 주세요.</div>';
+  }
+  refreshSaveButtons();
+  return c.blob;
+}
+
+function closeEditor(idx) {
+  const c = state.classes[idx]; if (!c) return;
+  if (c._edEl) c._edEl.classList.remove("editing");
+  c._edEl = null;
+  const ed = document.getElementById("ed-" + idx); if (ed) ed.hidden = true;
+}
+
+function renderAll() {
+  const box = document.getElementById("classes");
+  box.innerHTML = state.classes.map(panelHTML).join("");
+  refreshSaveButtons();
+  loadFonts().then(fitAll); fitAll();
+}
+
+document.getElementById("classes").addEventListener("change", e => {
+  const t = e.target, i = +t.dataset.i; if (Number.isNaN(i) || t.tagName !== "SELECT") return;
+  const c = state.classes[i];
+  c.segs[+t.dataset.s].course = +t.value; c.title = null; c.blob = null;
+  document.getElementById("cls-" + i).outerHTML = panelHTML(c, i);
+  refreshSaveButtons(); fit(i);
+});
+document.getElementById("classes").addEventListener("input", e => {
+  const t = e.target; if (!t.dataset || t.dataset.edit === undefined) return;
+  const i = +t.dataset.edit, c = state.classes[i];
+  if (!c || !c._edEl) return;
+  c._edEl.innerText = t.value;
+  fit(i); markStale(i);
+});
+document.getElementById("classes").addEventListener("click", e => {
+  const ed = e.target.closest(".live [data-ed]");
+  if (ed) {
+    const live = ed.closest(".live"), i = +live.id.slice(5), c = state.classes[i];
+    if (c._edEl) c._edEl.classList.remove("editing");
+    c._edEl = ed; ed.classList.add("editing");
+    const box = document.getElementById("ed-" + i), ta = document.getElementById("edt-" + i);
+    document.getElementById("edl-" + i).textContent = "고치는 중: " + ed.dataset.ed;
+    box.hidden = false; ta.value = ed.innerText.trim();
+    ta.focus();
+    return;
+  }
+  const done = e.target.closest("[data-done]");
+  if (done) { closeEditor(+done.dataset.done); return; }
+  const mk = e.target.closest("[data-make]");
+  if (mk) { const i = +mk.dataset.make; closeEditor(i); mk.disabled = true; makeImage(i).finally(() => { mk.disabled = false; }); return; }
+  const b = e.target.closest("[data-save]"); if (!b) return;
+  const c = state.classes[+b.dataset.save]; if (c && c.blob) saveBlob(c.file, c.blob, b, +b.dataset.save);
+});
+document.getElementById("viewerClose").addEventListener("click", closeViewer);
+document.addEventListener("keydown", e => { if (e.key === "Escape") closeViewer(); });
+document.getElementById("saveAll").addEventListener("click", async e => {
+  const btn = e.currentTarget; btn.disabled = true;
+  const zip = new JSZip();
+  for (let i = 0; i < state.classes.length; i++) { closeEditor(i); if (!state.classes[i].blob) await makeImage(i); }
+  const used = new Set();
+  state.classes.forEach(c => { if (!c.blob) return; let n = c.file, k = 2;
+    while (used.has(n)) n = c.file.replace(/\.png$/, "(" + (k++) + ").png");
+    used.add(n); zip.file(n, c.blob); });
+  const blob = await zip.generateAsync({ type: "blob" });
+  btn.disabled = false;
+  saveBlob(CATALOG.month + "월_수업계획서_전체.zip", blob, btn);
+});
+
+function readSheetRows(buf) {
+  const wb = XLSX.read(buf, { type: "array", cellStyles: false });
+  const ws = wb.Sheets[wb.SheetNames[0]];
+  /* 셀 위치를 엑셀의 실제 행·열 번호 그대로 읽어요(병합 위치와 정확히 맞추기 위해). */
+  const rg = XLSX.utils.decode_range(ws["!ref"] || "A1:A1");
+  const rows = [];
+  for (let r = 0; r <= rg.e.r; r++) {
+    const row = [];
+    for (let c = 0; c <= rg.e.c; c++) {
+      const cell = ws[XLSX.utils.encode_cell({ r, c })];
+      row[c] = cell ? String(cell.w ?? cell.v ?? "") : "";
+    }
+    rows.push(row);
+  }
+  (ws["!merges"] || []).forEach(mg => {
+    const v = (rows[mg.s.r] || [])[mg.s.c];
+    for (let r = mg.s.r; r <= mg.e.r; r++) for (let c = mg.s.c; c <= mg.e.c; c++) {
+      rows[r] = rows[r] || []; if (r !== mg.s.r || c !== mg.s.c) rows[r][c] = v;
+    }
+  });
+  return rows;
+}
+
+async function handleFile(f) {
+  const st = document.getElementById("status");
+  if (!f) return;
+  st.textContent = "엑셀을 읽는 중이에요…";
+  try {
+    const rows = readSheetRows(await f.arrayBuffer());
+    const groups = groupRows(rows);
+    if (!groups.length) throw new Error("수업 정보가 있는 줄을 찾지 못했어요.");
+    state.example = false;
+    state.classes = groups.map(g => buildClass(g, CATALOG));
+    const miss = state.classes.filter(c => c.segs.some(s => s.course < 0)).length;
+    const memoN = state.classes.filter(c => c.memo).length;
+    st.textContent = state.classes.length + "개 반을 찾았어요." + (miss ? " 과정을 골라야 하는 반이 " + miss + "개 있어요." : "") +
+      (groups.noMemoCol ? " 엑셀에 '특이사항' 칸이 없어서 기본 인사말을 넣었어요." : (memoN ? " 특이사항 문구로 인사말을 바꾼 반이 " + memoN + "개예요." : ""));
+    document.getElementById("resHint").textContent = "점선 글자를 눌러 고친 뒤 '이미지로 만들기'를 누르세요. 만들어진 이미지는 저장 버튼이나 길게 눌러 저장할 수 있어요.";
+    renderAll();
+  } catch (e) {
+    st.textContent = "엑셀을 읽지 못했어요. " + (e.message || "") + " 양식을 확인하고 다시 올려 주세요.";
+  }
+}
+const fileIn = document.getElementById("file"), drop = document.getElementById("drop");
+fileIn.addEventListener("change", () => { handleFile(fileIn.files[0]); fileIn.value = ""; });
+["dragenter", "dragover"].forEach(t => drop.addEventListener(t, e => { e.preventDefault(); drop.classList.add("over"); }));
+["dragleave", "drop"].forEach(t => drop.addEventListener(t, () => drop.classList.remove("over")));
+drop.addEventListener("drop", e => { e.preventDefault(); handleFile(e.dataTransfer.files[0]); });
+
+const nMonthly = CATALOG.courses.filter(c => c.kind === "monthly").length, nSeries = CATALOG.courses.length - nMonthly;
+document.getElementById("monthChip").textContent = CATALOG.year + "년 " + CATALOG.month + "월 과정 " + nMonthly + "개 · 호별 과정 " + nSeries + "개 등록됨";
+const catItem = c => "<div><b>" + esc(c.name) + (c.full !== c.name ? " · " + esc(c.full) : "") + "</b><span class=\"hint\">엑셀에 이렇게 적어요: " + esc(c.aliases.slice(0, 3).join(", ")) + "</span><ol>" +
+  c.sessions.map(s => "<li>" + esc(s.book) + "</li>").join("") + "</ol></div>";
+document.getElementById("catalogList").innerHTML =
+  "<h3 class=\"step\">" + CATALOG.month + "월 과정 (매달 바뀌어요)</h3>" + CATALOG.courses.filter(c => c.kind === "monthly").map(catItem).join("") +
+  "<h3 class=\"step\">호별 과정 (호수까지 적어 주세요)</h3>" + CATALOG.courses.filter(c => c.kind === "series").map(catItem).join("");
+
+/* 예시 */
+(function example() {
+  const li = CATALOG.courses.findIndex(c => c.name === "논리1");
+  state.classes = [{ names: ["예시 반"], time: "수요일 3:00~4:00", title: null,
+    segs: [{ stage: "논리1", datesText: "", course: li >= 0 ? li : 0,
+      dates: (() => { const out = []; const last = new Date(CATALOG.year, CATALOG.month, 0).getDate();
+        for (let d = 1; d <= last && out.length < 4; d++) if (new Date(CATALOG.year, CATALOG.month - 1, d).getDay() === 3) out.push({ y: CATALOG.year, m: CATALOG.month, d });
+        return out; })() }] }];
+  renderAll();
+})();
+</script>
+
+<script>
+/* 합친 페이지: 반 명단 엑셀을 다른 탭과 함께 써요 */
+(function () {
+  const orig = handleFile;
+  let fromShell = false;
+  function summary() {
+    return state.classes.map(c => ({ names: c.names.slice(), stages: c.segs.map(s => s.stage),
+      courses: c.segs.map(s => (CATALOG.courses[s.course] || {}).full || s.stage) }));
+  }
+  handleFile = async function (f) {
+    const r = await orig(f);
+    try {
+      if (f && !state.example && state.classes.length) {
+        if (!fromShell && parent.__shareRoster) parent.__shareRoster(await f.arrayBuffer(), f.name, "plan");
+        if (parent.__shareClasses) parent.__shareClasses(summary());
+      }
+    } catch (e) {}
+    return r;
+  };
+  window.__receiveRoster = async function (buf, name) {
+    fromShell = true;
+    try { await handleFile(new File([buf], name)); } finally { fromShell = false; }
+  };
+  /* 과정을 직접 고르면 피드백 탭에도 알려요 */
+  document.getElementById("classes").addEventListener("change", () => setTimeout(() => {
+    try { if (!state.example && parent.__shareClasses) parent.__shareClasses(summary()); } catch (e) {}
+  }, 0));
+  try { if (parent !== window && parent.__roster) window.__receiveRoster(parent.__roster.buf.slice(0), parent.__roster.name); } catch (e) {}
+})();
+</script>
+</body></html>
