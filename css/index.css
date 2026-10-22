@@ -1,0 +1,27 @@
+/* 첫 화면: 위에 얇은 머리띠(이름 + 탭 세 개), 아래는 고른 탭의 페이지가 화면을 가득 채워요 */
+/* Layout: 위에 얇은 머리띠(이름 + 탭 세 개), 아래는 고른 탭의 페이지가 화면을 가득 채워요 */
+html,body{height:100%}
+body{background:var(--bg);color:var(--fg);font-family:var(--font);display:flex;flex-direction:column;word-break:keep-all}
+.top{background:var(--surface);border-bottom:1px solid var(--line);padding-block:10px 0;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.row{max-width:1180px;margin:0 auto;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:6px 16px}
+h1{margin:0;font-size:18px;font-weight:900;letter-spacing:-.3px}
+.shared{font-size:12.5px;color:var(--muted)}
+.shared b{color:var(--ok);background:var(--ok-bg);border-radius:999px;padding:2px 10px;font-weight:700}
+.tabs{max-width:1180px;margin:8px auto 0;display:flex;gap:4px;overflow-x:auto}
+.tabs button{font:inherit;font-size:15px;font-weight:700;color:var(--muted);background:transparent;border:0;border-bottom:3px solid transparent;padding:8px 14px 9px;cursor:pointer;white-space:nowrap}
+.tabs button[aria-selected="true"]{color:var(--fg);border-bottom-color:var(--accent)}
+.tabs button:focus-visible{outline:3px solid var(--accent);outline-offset:-3px;border-radius:6px}
+.forms{position:relative}
+.forms summary{list-style:none;cursor:pointer;font-size:13px;font-weight:700;color:var(--fg);background:var(--soft);border-radius:999px;padding:4px 12px}
+.forms summary::-webkit-details-marker{display:none}
+.forms ul{position:absolute;right:0;top:calc(100% + 6px);z-index:5;margin:0;padding:8px;list-style:none;background:var(--surface);border:1px solid var(--line);border-radius:12px;box-shadow:0 8px 24px rgba(0,0,0,.12);min-width:260px;max-width:calc(100vw - 32px)}
+@media (max-width:640px){.forms ul{right:auto;left:0}}
+.forms li a{display:block;padding:8px 10px;border-radius:8px;color:var(--fg);text-decoration:none;font-size:14px}
+.forms li a:hover,.forms li a:focus-visible{background:var(--soft)}
+.forms li small{display:block;color:var(--muted);font-size:12px}
+.frames{flex:1;min-height:0;position:relative}
+.frames iframe{position:absolute;inset:0;width:100%;height:100%;border:0;background:var(--bg)}
+/* 숨긴 탭도 화면 배치는 유지해야 글자 크기 계산이 맞아요 */
+.frames iframe.off{visibility:hidden;pointer-events:none;z-index:-1}
+.kakao{max-width:1180px;margin:8px auto 0;background:var(--ok-bg,#e6f4ee);color:var(--fg);border-radius:10px;padding:8px 12px;font-size:13.5px}
+.kakao a{color:var(--ok,#1d6b4b);font-weight:700}

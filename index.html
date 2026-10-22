@@ -1,58 +1,27 @@
-<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
-<title>한우리 수업도우미</title>
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="claude:viewport-fit-sides" content="cover">
+<title>한우리 수업도우미</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700;900&display=swap">
-<style>
-/* Layout: 위에 얇은 머리띠(이름 + 탭 세 개), 아래는 고른 탭의 페이지가 화면을 가득 채워요 */
-:root{
-  --bg:#eef1f6; --surface:#ffffff; --fg:#1f2a4a; --muted:#5d6886; --line:#d9dfea;
-  --accent:#1f2a4a; --accent-fg:#ffffff; --soft:#e3eaf5; --ok:#1d6b4b; --ok-bg:#e6f4ee;
-  --font:"Noto Sans KR","Apple SD Gothic Neo","Malgun Gothic",sans-serif;
-}
-@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
-  --bg:#12161f; --surface:#1b2130; --fg:#e7ebf4; --muted:#9aa5bf; --line:#2c3447;
-  --accent:#8fb0ec; --accent-fg:#12161f; --soft:#243049; --ok:#8fd8b5; --ok-bg:#163428; color-scheme:dark}}
-:root[data-theme="dark"]{
-  --bg:#12161f; --surface:#1b2130; --fg:#e7ebf4; --muted:#9aa5bf; --line:#2c3447;
-  --accent:#8fb0ec; --accent-fg:#12161f; --soft:#243049; --ok:#8fd8b5; --ok-bg:#163428; color-scheme:dark}
-html,body{height:100%}
-body{background:var(--bg);color:var(--fg);font-family:var(--font);display:flex;flex-direction:column;word-break:keep-all}
-.top{background:var(--surface);border-bottom:1px solid var(--line);padding-block:10px 0;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
-.row{max-width:1180px;margin:0 auto;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:6px 16px}
-h1{margin:0;font-size:18px;font-weight:900;letter-spacing:-.3px}
-.shared{font-size:12.5px;color:var(--muted)}
-.shared b{color:var(--ok);background:var(--ok-bg);border-radius:999px;padding:2px 10px;font-weight:700}
-.tabs{max-width:1180px;margin:8px auto 0;display:flex;gap:4px;overflow-x:auto}
-.tabs button{font:inherit;font-size:15px;font-weight:700;color:var(--muted);background:transparent;border:0;border-bottom:3px solid transparent;padding:8px 14px 9px;cursor:pointer;white-space:nowrap}
-.tabs button[aria-selected="true"]{color:var(--fg);border-bottom-color:var(--accent)}
-.tabs button:focus-visible{outline:3px solid var(--accent);outline-offset:-3px;border-radius:6px}
-.forms{position:relative}
-.forms summary{list-style:none;cursor:pointer;font-size:13px;font-weight:700;color:var(--fg);background:var(--soft);border-radius:999px;padding:4px 12px}
-.forms summary::-webkit-details-marker{display:none}
-.forms ul{position:absolute;right:0;top:calc(100% + 6px);z-index:5;margin:0;padding:8px;list-style:none;background:var(--surface);border:1px solid var(--line);border-radius:12px;box-shadow:0 8px 24px rgba(0,0,0,.12);min-width:260px;max-width:calc(100vw - 32px)}
-@media (max-width:640px){.forms ul{right:auto;left:0}}
-.forms li a{display:block;padding:8px 10px;border-radius:8px;color:var(--fg);text-decoration:none;font-size:14px}
-.forms li a:hover,.forms li a:focus-visible{background:var(--soft)}
-.forms li small{display:block;color:var(--muted);font-size:12px}
-.kakao{max-width:1180px;margin:8px auto 0;background:var(--ok-bg);color:var(--fg);border-radius:10px;padding:8px 12px;font-size:13.5px}
-.kakao a{color:var(--ok);font-weight:700}
-.frames{flex:1;min-height:0;position:relative}
-.frames iframe{position:absolute;inset:0;width:100%;height:100%;border:0;background:var(--bg)}
-/* 숨긴 탭도 화면 배치는 유지해야 글자 크기 계산이 맞아요 */
-.frames iframe.off{visibility:hidden;pointer-events:none;z-index:-1}
-</style>
+<link rel="stylesheet" href="css/base.css?v=__V__">
+<link rel="stylesheet" href="css/index.css?v=__V__">
+</head>
+<body>
 
 <div class="top">
   <div class="row">
     <h1>한우리 수업도우미</h1>
-    <span class="shared" id="shared">반 명단 엑셀은 한 탭에서 올리면 다른 탭에도 같이 들어가요.</span>
+    <span class="shared" id="shared">반 명단 엑셀은 한 번만 올리면 세 탭 모두에 들어가요.</span>
     <details class="forms" id="forms" hidden>
       <summary>양식·안내 받기</summary>
       <ul>
-        <li><a href="forms/반 명단 엑셀 (이름으로 적기).xlsx" download>반 명단 엑셀 (이름으로 적기)<small>같은 반 친구는 No 칸을 합쳐요</small></a></li>
-        <li><a href="forms/반 명단 엑셀 (팀 이름으로 적기).xlsx" download>반 명단 엑셀 (팀 이름으로 적기)<small>팀마다 No를 따로 적고, 인원 칸에 학생 수를 적어요</small></a></li>
+        <li><a href="forms/반 명단 엑셀 (이름으로 적기).xlsx" download>반 명단 엑셀 (이름으로 적기)<small>같은 반 친구는 둘째 줄부터 이름만 적어요</small></a></li>
+        <li><a href="forms/반 명단 엑셀 (팀 이름으로 적기).xlsx" download>반 명단 엑셀 (팀 이름으로 적기)<small>팀마다 한 줄, 인원 칸에 학생 수</small></a></li>
         <li><a href="forms/숙제 엑셀 (빈칸).xlsx" download>숙제 엑셀 (빈칸)<small>No · 단계 · 차시 · 숙제</small></a></li>
         <li><a href="forms/한우리_수업도우미.html" download>HTML 파일 하나로 받기<small>인터넷 주소 없이 컴퓨터에서 바로 열어요</small></a></li>
         <li><a href="forms/한우리_수업도우미_사용안내.pptx" download>사용 안내 PPT<small>수업계획서 · 숙제 안내문 · 피드백 만드는 방법</small></a></li>
@@ -66,63 +35,13 @@ h1{margin:0;font-size:18px;font-weight:900;letter-spacing:-.3px}
     <button type="button" role="tab" id="tab-feedback" aria-controls="f-feedback" aria-selected="false" data-tab="feedback">피드백</button>
   </div>
 </div>
-<!-- 탭 페이지 주소 끝의 ?v= 는 올릴 때마다 바뀌어서, 휴대폰·컴퓨터가 예전 페이지를 기억하지 않게 해요 -->
+<!-- 주소 끝의 ?v= 는 GitHub에 올릴 때마다 바뀌어서, 휴대폰·컴퓨터가 예전 파일을 기억하지 않게 해요 -->
 <div class="frames">
   <iframe id="f-plan" role="tabpanel" aria-labelledby="tab-plan" title="수업계획서 만들기" src="plan.html?v=__V__"></iframe>
   <iframe id="f-homework" role="tabpanel" aria-labelledby="tab-homework" title="숙제 안내문 만들기" src="homework.html?v=__V__" class="off"></iframe>
   <iframe id="f-feedback" role="tabpanel" aria-labelledby="tab-feedback" title="수업 피드백 만들기" src="feedback.html?v=__V__" class="off"></iframe>
 </div>
 
-<script>
-const TABS = ["plan", "homework", "feedback"];
-function show(name) {
-  if (!TABS.includes(name)) name = "plan";
-  TABS.forEach(t => {
-    document.getElementById("tab-" + t).setAttribute("aria-selected", t === name ? "true" : "false");
-    document.getElementById("f-" + t).classList.toggle("off", t !== name);
-  });
-  try { localStorage.setItem("suite_tab", name); } catch (e) {}
-  /* 숨겨져 있던 페이지는 크기를 다시 맞춰요 */
-  try { document.getElementById("f-" + name).contentWindow.dispatchEvent(new Event("resize")); } catch (e) {}
-}
-document.querySelector(".tabs").addEventListener("click", e => { const b = e.target.closest("[data-tab]"); if (b) show(b.dataset.tab); });
-document.querySelector(".tabs").addEventListener("keydown", e => {
-  if (e.key !== "ArrowRight" && e.key !== "ArrowLeft") return;
-  const cur = TABS.findIndex(t => document.getElementById("tab-" + t).getAttribute("aria-selected") === "true");
-  const next = TABS[(cur + (e.key === "ArrowRight" ? 1 : TABS.length - 1)) % TABS.length];
-  show(next); document.getElementById("tab-" + next).focus();
-});
-let first = location.hash.slice(1);
-if (!TABS.includes(first)) { try { first = localStorage.getItem("suite_tab") || "plan"; } catch (e) { first = "plan"; } }
-show(first);
-
-/* Claude 밖(GitHub)에서 열면 엑셀 양식 받기 메뉴를 보여 줘요 */
-if (!window.claude) document.getElementById("forms").hidden = false;
-
-/* 카카오톡 안 브라우저는 그림 저장이 막혀 있어서, 휴대폰 기본 브라우저로 다시 열어요 */
-if (!window.claude && /KAKAOTALK/i.test(navigator.userAgent)) {
-  const ext = "kakaotalk://web/openExternal?url=" + encodeURIComponent(location.href);
-  document.getElementById("kakao").hidden = false;
-  document.getElementById("kakaoOpen").href = ext;
-  try { if (!sessionStorage.getItem("suite_kakao_open")) { sessionStorage.setItem("suite_kakao_open", "1"); location.href = ext; } } catch (e) {}
-}
-
-/* 탭끼리 반 명단 나누기 */
-window.__roster = null;
-window.__rosterClasses = null;
-window.__shareRoster = function (buf, name, from) {
-  window.__roster = { buf: buf.slice(0), name };
-  document.getElementById("shared").innerHTML = "반 명단: <b></b>";
-  document.querySelector("#shared b").textContent = name;
-  TABS.forEach(t => {
-    if (t === from) return;
-    try { const w = document.getElementById("f-" + t).contentWindow; if (w && w.__receiveRoster) w.__receiveRoster(buf.slice(0), name); } catch (e) {}
-  });
-};
-window.__shareClasses = function (classes) {
-  window.__rosterClasses = classes;
-  try { const w = document.getElementById("f-feedback").contentWindow; if (w && w.__receiveClasses) w.__receiveClasses(classes); } catch (e) {}
-};
-</script>
-
-</body></html>
+<script src="js/index.js?v=__V__"></script>
+</body>
+</html>

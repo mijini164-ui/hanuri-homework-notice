@@ -1,0 +1,97 @@
+/* Layout: one narrow working column — upload step on top, one panel per class below, each showing the finished image */
+body{background:var(--bg);color:var(--fg);font-family:var(--font);font-size:15px;line-height:1.55;word-break:keep-all}
+.page{max-width:760px;margin:0 auto;padding-block:28px 64px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:flex;flex-direction:column;gap:20px}
+header h1{font-size:28px;font-weight:900;letter-spacing:-.5px;text-wrap:balance;margin:0}
+header p{margin:6px 0 0;color:var(--muted)}
+.month{display:inline-block;margin-top:10px;background:var(--soft);color:var(--fg);border-radius:999px;padding:4px 12px;font-size:13px;font-weight:700}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:20px;display:flex;flex-direction:column;gap:14px;min-width:0}
+.step{font-size:12px;font-weight:700;letter-spacing:.06em;color:var(--muted)}
+.panel h2{font-size:19px;margin:0}
+.drop{border:2px dashed var(--line);border-radius:14px;padding:26px 16px;text-align:center;cursor:pointer;transition:border-color .15s,background .15s}
+.drop:hover,.drop.over{border-color:var(--accent);background:var(--soft)}
+.drop strong{display:block;font-size:16px}
+.drop span{color:var(--muted);font-size:13px}
+.drop input{position:absolute;width:1px;height:1px;opacity:0}
+.hint{font-size:13px;color:var(--muted);margin:0}
+.hint code{font-family:inherit;background:var(--soft);border-radius:6px;padding:1px 6px;color:var(--fg)}
+.status{font-size:14px;color:var(--muted);min-height:1em}
+.bar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between}
+button{font:inherit;font-weight:700;border-radius:10px;padding:9px 16px;cursor:pointer;border:1px solid var(--accent);background:var(--accent);color:var(--accent-fg)}
+button.ghost{background:transparent;color:var(--fg);border-color:var(--line)}
+button:disabled{opacity:.5;cursor:default}
+button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-visible,.drop:focus-within{outline:3px solid var(--link);outline-offset:2px}
+.cls-head{display:flex;flex-wrap:wrap;gap:8px;align-items:baseline;justify-content:space-between}
+.cls-head h3{margin:0;font-size:17px}
+.tag{font-size:12px;font-weight:700;border-radius:999px;padding:2px 10px;background:var(--soft);color:var(--fg)}
+.fields{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.fields .wide{grid-column:1/-1}
+textarea{font:inherit;font-size:14px;color:var(--fg);background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:7px 10px;width:100%;min-width:0;resize:vertical;line-height:1.5}
+.fields label,.seg label{display:flex;flex-direction:column;gap:4px;font-size:12px;color:var(--muted);font-weight:700;min-width:0}
+input[type=text],select,textarea{font:inherit;font-size:14px;color:var(--fg);background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:7px 10px;width:100%;min-width:0}
+.segs{display:flex;flex-direction:column;gap:8px}
+.seg{display:grid;grid-template-columns:1fr 1.4fr;gap:10px;align-items:end}
+.seg .dates{font-size:13px;color:var(--fg)}
+.warn{background:var(--warn-bg);color:var(--warn-fg);border-radius:10px;padding:8px 12px;font-size:13px;font-weight:500}
+.live{position:relative;overflow:hidden;border:1px solid var(--line);border-radius:12px;background:#f4f6fa}
+.scaler{width:1200px;transform-origin:0 0}
+.live .sheet .ed{cursor:pointer;border-radius:10px;outline:3px dashed rgba(74,123,208,.5);outline-offset:4px}
+.live .sheet .ed.editing{outline:5px solid #e07a3f}
+.sheet em{font-style:normal}
+.editor{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--surface);border:2px solid var(--accent);border-radius:12px;padding:12px;display:flex;flex-direction:column;gap:8px}
+.editor label{display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:700;color:var(--muted)}
+.editor textarea{font-size:16px}
+[hidden]{display:none!important}
+.btns{display:flex;gap:8px;flex-wrap:wrap}
+.viewer{position:fixed;inset:0;z-index:50;background:rgba(12,16,26,.92);display:flex;flex-direction:column;padding:env(safe-area-inset-top,0px) max(12px,env(safe-area-inset-right,0px)) env(safe-area-inset-bottom,0px) max(12px,env(safe-area-inset-left,0px))}
+.viewer .vbar{display:flex;gap:12px;align-items:center;justify-content:space-between;padding:12px 0;color:#fff;font-size:14px;line-height:1.5}
+.viewer .vbar p{margin:0}
+.viewer .vbar button{flex:none;background:#fff;color:#1f2a4a;border-color:#fff}
+.viewer .vimg{flex:1;overflow:auto;-webkit-overflow-scrolling:touch}
+.viewer img{display:block;width:100%;max-width:700px;margin:0 auto;height:auto;-webkit-touch-callout:default;user-select:auto}
+.shot{border-radius:12px;border:1px solid var(--line);background:var(--bg);overflow:hidden}
+.shot img{display:block;width:100%;height:auto}
+.shot .wait{padding:40px;text-align:center;color:var(--muted)}
+.howto summary{font-size:13px;color:var(--muted)}
+.howto ul{margin:8px 0 0;padding-left:18px;display:flex;flex-direction:column;gap:4px}
+details{font-size:14px}
+details summary{cursor:pointer;font-weight:700}
+.cat{display:flex;flex-direction:column;gap:10px;margin-top:12px}
+.cat div{border-top:1px solid var(--line);padding-top:8px}
+.cat b{display:block}
+.cat ol{margin:4px 0 0;padding-left:20px;color:var(--muted)}
+@media (max-width:520px){.fields,.seg{grid-template-columns:1fr}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+
+/* ---- 이미지로 저장되는 수업계획서 (고정 디자인) ---- */
+#stage{position:fixed;left:-20000px;top:0;width:1200px;pointer-events:none}
+.sheet{--n:#1f2a4a;--g:#4a5878;--sl:#e3e7ee;--sb:#e3eaf5;width:1200px;background:#f4f6fa;font-family:"Noto Sans KR",sans-serif;color:#1f2a4a;word-break:keep-all;line-height:normal}
+.sheet .bar1{height:14px;background:linear-gradient(90deg,#4a7bd0,#2b3f6e,#1f2a4a)}
+.sheet .bar2{height:14px;background:linear-gradient(90deg,#1f2a4a,#2b3f6e,#4a7bd0)}
+.sheet .wrap{padding:60px 70px 70px}
+.sheet .hello{text-align:center;font-size:34px;color:#4a5878;margin-bottom:6px}
+.sheet h1{text-align:center;font-weight:900;letter-spacing:-1px;line-height:1.2;margin:0;color:#1f2a4a}
+.sheet .time{margin:30px auto 44px;display:table;background:#1f2a4a;color:#fff;border-radius:60px;padding:16px 46px;font-size:36px;font-weight:700}
+.sheet .time span{font-weight:400;opacity:.8;margin-right:16px}
+.sheet .box{background:#fff;border:2px solid #e3e7ee;border-radius:36px;padding:36px 40px 30px;margin-bottom:30px}
+.sheet .mon{font-size:44px;font-weight:900;margin-bottom:18px;padding-left:6px}
+.sheet .grid{display:grid;grid-template-columns:repeat(7,1fr);row-gap:6px}
+.sheet .wd{text-align:center;font-size:26px;font-weight:700;color:#6b7590;padding-bottom:12px;border-bottom:2px solid #e3e7ee;margin-bottom:8px}
+.sheet .wd.sun{color:#d9534f}.sheet .wd.sat{color:#4a7bd0}
+.sheet .cell{height:112px;display:flex;flex-direction:column;align-items:center;padding-top:8px}
+.sheet .num{width:66px;height:66px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:32px;color:#1f2a4a}
+.sheet .cell.sun .num{color:#d9534f}.sheet .cell.sat .num{color:#4a7bd0}
+.sheet .cell.on .num{color:#fff;font-weight:700}
+.sheet .lab{margin-top:6px;font-size:19px;font-weight:700;white-space:nowrap;letter-spacing:-.5px}
+.sheet .legend{display:flex;gap:30px;justify-content:center;margin-top:14px;font-size:24px;color:#4a5878}
+.sheet .legend i{display:inline-block;width:22px;height:22px;border-radius:50%;margin-right:8px;vertical-align:-3px}
+.sheet .sec{font-size:40px;font-weight:900;margin:14px 0 22px 6px}
+.sheet .card{display:flex;gap:28px;background:#fff;border:2px solid #e3e7ee;border-radius:32px;padding:30px 36px;margin-bottom:22px}
+.sheet .badge{flex:none;width:76px;height:76px;border-radius:50%;color:#fff;font-size:34px;font-weight:900;display:flex;align-items:center;justify-content:center}
+.sheet .meta{font-size:24px;color:#4a5878;margin-bottom:6px}
+.sheet .meta b{color:#2b5bb8;background:#eaf1fc;border-radius:16px;padding:3px 14px;margin-left:10px;font-size:21px}
+.sheet .book{font-size:36px;font-weight:700;line-height:1.3;margin-bottom:8px}
+.sheet .book.none{color:#b0b7c8}
+.sheet .desc{font-size:27px;line-height:1.5;color:#333}
+.sheet .lnk{margin-top:12px;font-size:22px;color:#6b7590}
+.sheet .lnk b{color:#4a5878;margin-right:10px}
+.sheet .msg{margin-top:40px;background:#fff;border:2px solid #e3e7ee;border-radius:36px;padding:40px;text-align:center;font-size:34px;line-height:1.6}

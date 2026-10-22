@@ -1,0 +1,29 @@
+/* 모든 페이지 공통: 기본 초기화 + 색상 토큰(밝은/어두운 화면). 색을 바꾸려면 여기만 고치면 돼요. */
+:root{
+  color-scheme:light;box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
+  --bg:#eef1f6;        /* 페이지 배경 */
+  --surface:#ffffff;   /* 카드·패널 */
+  --fg:#1f2a4a;        /* 글자 */
+  --muted:#5d6886;     /* 흐린 글자 */
+  --line:#d9dfea;      /* 테두리 */
+  --accent:#1f2a4a; --accent-fg:#ffffff;  /* 주요 버튼 */
+  --soft:#e3eaf5;      /* 옅은 강조 배경 */
+  --link:#2b5bb8;      /* 포커스·링크 */
+  --hw:#e07a3f; --hw-soft:#fdeee4;        /* 주황 강조(숙제·학생 이름) */
+  --warn-bg:#fff3e6; --warn-fg:#9a4a10;   /* 경고 */
+  --ok:#1d6b4b; --ok-bg:#e6f4ee;          /* 완료·안내 */
+  --font:"Noto Sans KR","Apple SD Gothic Neo","Malgun Gothic",sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#12161f; --surface:#1b2130; --fg:#e7ebf4; --muted:#9aa5bf; --line:#2c3447;
+  --accent:#8fb0ec; --accent-fg:#12161f; --soft:#243049; --link:#9cbcf5;
+  --hw:#f0a070; --hw-soft:#3a2a18; --warn-bg:#3a2a18; --warn-fg:#f3c08e; --ok:#8fd8b5; --ok-bg:#163428; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#12161f; --surface:#1b2130; --fg:#e7ebf4; --muted:#9aa5bf; --line:#2c3447;
+  --accent:#8fb0ec; --accent-fg:#12161f; --soft:#243049; --link:#9cbcf5;
+  --hw:#f0a070; --hw-soft:#3a2a18; --warn-bg:#3a2a18; --warn-fg:#f3c08e; --ok:#8fd8b5; --ok-bg:#163428; color-scheme:dark}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif}
+img{max-width:100%}
+[hidden]:not([hidden=until-found i]){display:none!important}
