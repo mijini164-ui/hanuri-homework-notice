@@ -234,7 +234,7 @@ function fillStages(){
   const by={}; Object.values(reports).forEach(r=>{(by[r.stage]=by[r.stage]||r)});
   const st=Object.values(by).sort((a,b)=>(a.order??99)-(b.order??99));
   if(!st.length){$('stage').innerHTML='<option value="">아직 등록된 반 자료가 없어요</option>';$('report').innerHTML='';return}
-  $('stage').innerHTML=CATS.concat([...new Set(st.map(r=>r.category||'기타'))].filter(c=>!CATS.includes(c))).map(c=>{const g=st.filter(r=>(r.category||'기타')===c);return g.length?`<optgroup label="${esc(c)}">${g.map(r=>`<option value="${esc(r.stage)}">${esc(r.stageLabel||r.stage)}${r.grade?' ('+esc(r.grade)+')':''}</option>`).join('')}</optgroup>`:''}).join('');
+  $('stage').innerHTML=CATS.concat([...new Set(st.map(r=>r.category||'기타'))].filter(c=>!CATS.includes(c))).map(c=>{const g=st.filter(r=>(r.category||'기타')===c);return g.length?`<optgroup label="${esc(c)}">${g.map(r=>`<option value="${esc(r.stage)}">${esc(r.stageLabel||r.stage)}</option>`).join('')}</optgroup>`:''}).join('');
   if(prev&&by[prev])$('stage').value=prev;
   fillPeriods();
 }
