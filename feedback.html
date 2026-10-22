@@ -312,7 +312,8 @@ async function savePng(){
     const canvas=await html2canvas(cap.firstElementChild,{scale:1.5,useCORS:true,backgroundColor:'#f6f1ea'});
     const blob=await new Promise(ok=>canvas.toBlob(ok,'image/png'));
     const fn=`${r.stage}_${r.period||r.month}${oneNo()?'_'+oneNo()+'차시':''}_${$('student').value.trim()||'반공통'}.png`.replace(/\s+/g,'');
-    const showImg=()=>{ const url=URL.createObjectURL(blob); $('preview').innerHTML=`<img src="${url}" alt="저장용 이미지" style="width:100%;display:block;-webkit-touch-callout:default">`; $('previewBox').style.height=''; $('previewBox').scrollIntoView({behavior:'smooth',block:'start'}); status('이미지를 길게 눌러(컴퓨터는 오른쪽 클릭) 저장해 주세요. 다시 고치면 미리보기로 돌아가요.'); };
+    const dataUrl=canvas.toDataURL('image/png');
+    const showImg=()=>{ const url=dataUrl; $('preview').innerHTML=`<img src="${url}" alt="저장용 이미지" style="width:100%;display:block;-webkit-touch-callout:default">`; $('previewBox').style.height=''; $('previewBox').scrollIntoView({behavior:'smooth',block:'start'}); status('이미지를 길게 눌러(컴퓨터는 오른쪽 클릭) 저장해 주세요. 다시 고치면 미리보기로 돌아가요.'); };
     if(dl){ try{ await dl.save({filename:fn,data:blob}); status('이미지를 저장했어요.'); }catch(err){ if(err&&err.code==='declined'){status('저장을 취소했어요.')}else{showImg()} } }
     else { showImg(); }
   }catch(e){ status(e&&e.code==='declined'?'저장을 취소했어요.':'이미지를 만들지 못했어요. 잠시 뒤 다시 눌러 주세요.',true) }

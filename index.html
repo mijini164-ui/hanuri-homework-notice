@@ -36,6 +36,8 @@ h1{margin:0;font-size:18px;font-weight:900;letter-spacing:-.3px}
 .forms li a{display:block;padding:8px 10px;border-radius:8px;color:var(--fg);text-decoration:none;font-size:14px}
 .forms li a:hover,.forms li a:focus-visible{background:var(--soft)}
 .forms li small{display:block;color:var(--muted);font-size:12px}
+.kakao{max-width:1180px;margin:8px auto 0;background:var(--ok-bg);color:var(--fg);border-radius:10px;padding:8px 12px;font-size:13.5px}
+.kakao a{color:var(--ok);font-weight:700}
 .frames{flex:1;min-height:0;position:relative}
 .frames iframe{position:absolute;inset:0;width:100%;height:100%;border:0;background:var(--bg)}
 /* 숨긴 탭도 화면 배치는 유지해야 글자 크기 계산이 맞아요 */
@@ -57,6 +59,7 @@ h1{margin:0;font-size:18px;font-weight:900;letter-spacing:-.3px}
       </ul>
     </details>
   </div>
+  <p class="kakao" id="kakao" hidden>카카오톡 안에서는 그림 저장이 잘 되지 않아요. <a id="kakaoOpen" href="#">다른 브라우저로 열기</a></p>
   <div class="tabs" role="tablist" aria-label="만들 자료">
     <button type="button" role="tab" id="tab-plan" aria-controls="f-plan" aria-selected="true" data-tab="plan">수업계획서</button>
     <button type="button" role="tab" id="tab-homework" aria-controls="f-homework" aria-selected="false" data-tab="homework">숙제 안내문</button>
@@ -94,6 +97,14 @@ show(first);
 
 /* Claude 밖(GitHub)에서 열면 엑셀 양식 받기 메뉴를 보여 줘요 */
 if (!window.claude) document.getElementById("forms").hidden = false;
+
+/* 카카오톡 안 브라우저는 그림 저장이 막혀 있어서, 휴대폰 기본 브라우저로 다시 열어요 */
+if (!window.claude && /KAKAOTALK/i.test(navigator.userAgent)) {
+  const ext = "kakaotalk://web/openExternal?url=" + encodeURIComponent(location.href);
+  document.getElementById("kakao").hidden = false;
+  document.getElementById("kakaoOpen").href = ext;
+  try { if (!sessionStorage.getItem("suite_kakao_open")) { sessionStorage.setItem("suite_kakao_open", "1"); location.href = ext; } } catch (e) {}
+}
 
 /* 탭끼리 반 명단 나누기 */
 window.__roster = null;
