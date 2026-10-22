@@ -41,6 +41,7 @@ details.more .inner{display:flex;flex-direction:column;gap:10px}
 .addrow input{flex:1;min-width:0}
 .who{font-size:1rem;font-weight:900}
 .who span{color:var(--hw)}
+.who small{font-weight:400}
 .checks{display:flex;flex-direction:column;gap:6px}
 .ck{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:10px}
 .ck span{font-weight:500;font-size:.92rem}

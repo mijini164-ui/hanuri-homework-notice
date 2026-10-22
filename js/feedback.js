@@ -58,9 +58,9 @@ function namesOf(){const c=classes[+$('cls').value];const base=c&&$('cls').value
 /* 체크 UI */
 function buildChecks(){
   $('checks').innerHTML=ITEMS.map((it,i)=>`<div class="ck"><span id="ck${i}">${it}</span><div class="seg" role="group" aria-labelledby="ck${i}">${LV.map(l=>`<button type="button" data-i="${it}" data-l="${l}" aria-pressed="false">${l}</button>`).join('')}</div></div>`).join('');
-  $('checks').addEventListener('click',e=>{const b=e.target.closest('button[data-i]');if(!b||!cur.name)return;const d=stuData(cur.name),it=b.dataset.i,l=b.dataset.l;if(d.checks[it]===l)delete d.checks[it];else d.checks[it]=l;paintChecks();changed()});
+  $('checks').addEventListener('click',e=>{const b=e.target.closest('button[data-i]');if(!b)return;const d=stuData(cur.name),it=b.dataset.i,l=b.dataset.l;if(d.checks[it]===l)delete d.checks[it];else d.checks[it]=l;paintChecks();changed()});
 }
-function paintChecks(){const d=cur.name?stuData(cur.name):{checks:{}};document.querySelectorAll('#checks button[data-i]').forEach(b=>b.setAttribute('aria-pressed',d.checks[b.dataset.i]===b.dataset.l?'true':'false'))}
+function paintChecks(){const d=stuData(cur.name);document.querySelectorAll('#checks button[data-i]').forEach(b=>b.setAttribute('aria-pressed',d.checks[b.dataset.i]===b.dataset.l?'true':'false'))}
 
 /* 리포트 이미지 HTML */
 /* 차시 하나만 고르면 그 차시 카드와 그날 피드백만 들어가요 */
@@ -144,7 +144,7 @@ function personalText(name,d){
   return out;
 }
 function compose(name){
-  const d=name?stuData(name):{checks:{},memo:'',variant:0};
+  const d=stuData(name||'');
   const common=$('common').value.trim().replace(/\{\s*이름\s*\}/g,name||'우리 아이');
   const paras=[common,personalText(name,d)].map(endDot).filter(Boolean);
   if(!paras.length) return '';
@@ -154,9 +154,9 @@ function finalText(name){const d=stuData(name);return d.edited&&d.text.trim()?d.
 
 /* 화면 다시 그리기 */
 function changed(){
-  if(cur.name){const d=stuData(cur.name);if(!d.edited){$('text').value=compose(cur.name);autoH()}}
-  else {$('text').value=compose('');autoH()}
-  $('editedNote').hidden=!(cur.name&&stuData(cur.name).edited);
+  /* 학생 이름이 없어도(반 명단 없이 바로 쓸 때) 상·중·하 체크와 직접 쓰기를 할 수 있어요 */
+  {const d=stuData(cur.name);if(!d.edited){$('text').value=compose(cur.name);autoH()}}
+  $('editedNote').hidden=!stuData(cur.name).edited;
   persist(); render(); drawChips(); drawAll();
 }
 function drawChips(){
@@ -171,9 +171,10 @@ function drawAll(){
 }
 function selectStudent(name){
   cur.name=name||'';
-  $('stuBox').hidden=!cur.name;
-  $('who').textContent=cur.name;
-  if(cur.name){const d=stuData(cur.name);$('memo').value=d.memo||'';$('text').value=finalText(cur.name)}
+  $('stuBox').hidden=false;
+  $('prev').parentElement.hidden=namesOf().length<2;
+  $('who').innerHTML=cur.name?'<span>'+esc(cur.name)+'</span> 학생':'학생 이름 없이 쓰기 <small class="hint">(위에서 이름을 추가하면 학생마다 따로 남아요)</small>';
+  {const d=stuData(cur.name);$('memo').value=d.memo||'';$('text').value=finalText(cur.name)}
   paintChecks(); autoH(); changed();
 }
 function loadClass(){
@@ -216,10 +217,10 @@ buildChecks(); buildClosings();
 $('common').addEventListener('input',()=>{store.common[cur.key]=$('common').value;changed()});
 $('fillCommon').onclick=()=>{const t=commonDraft(true);if(!t){status('먼저 반이나 과정을 골라 주세요.',true);return}
   const c=$('common').value.trim();$('common').value=c&&!c.includes(t)?c+'\n'+t:t;store.common[cur.key]=$('common').value;changed();status('차시별 수업 내용을 넣었어요. 필요한 부분만 남기고 고쳐 주세요.')};
-$('memo').addEventListener('input',()=>{grow($('memo'),96);if(!cur.name)return;stuData(cur.name).memo=$('memo').value;changed()});
-$('text').addEventListener('input',()=>{autoH();if(!cur.name){render();return}const d=stuData(cur.name);d.text=$('text').value;d.edited=true;$('editedNote').hidden=false;persist();render();drawAll()});
-$('gen').onclick=()=>{if(!cur.name)return;const d=stuData(cur.name);d.edited=false;d.text='';changed();status('공통 + 개인 피드백으로 다시 합쳤어요.')};
-$('alt').onclick=()=>{if(!cur.name)return;const d=stuData(cur.name);if(!Object.keys(d.checks).length){status('체크한 항목이 있을 때 다른 표현으로 바꿀 수 있어요.',true);return}d.variant=(d.variant||0)+1;d.edited=false;changed()};
+$('memo').addEventListener('input',()=>{grow($('memo'),96);stuData(cur.name).memo=$('memo').value;changed()});
+$('text').addEventListener('input',()=>{autoH();const d=stuData(cur.name);d.text=$('text').value;d.edited=true;$('editedNote').hidden=false;persist();render();drawAll()});
+$('gen').onclick=()=>{const d=stuData(cur.name);d.edited=false;d.text='';changed();status('공통 + 개인 피드백으로 다시 합쳤어요.')};
+$('alt').onclick=()=>{const d=stuData(cur.name);if(!Object.keys(d.checks).length){status('체크한 항목이 있을 때 다른 표현으로 바꿀 수 있어요.',true);return}d.variant=(d.variant||0)+1;d.edited=false;changed()};
 $('chips').addEventListener('click',e=>{const b=e.target.closest('[data-n]');if(b)selectStudent(b.dataset.n)});
 function step(dir){const ns=namesOf();if(!ns.length)return;const i=ns.indexOf(cur.name);selectStudent(ns[(i+dir+ns.length)%ns.length]);$('stuBox').scrollIntoView({behavior:'smooth',block:'nearest'})}
 $('prev').onclick=()=>step(-1);$('next').onclick=()=>step(1);
