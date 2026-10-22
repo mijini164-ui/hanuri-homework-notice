@@ -100,6 +100,9 @@ select:focus,input:focus,textarea:focus,button:focus-visible{outline:2px solid v
             <select id="report"></select>
           </label>
         </div>
+        <label class="f" for="scope">보낼 범위
+          <select id="scope"><option value="">한 달 전체 (모든 차시)</option></select>
+        </label>
         <label class="f" for="pick" id="pickWrap" hidden>반 명단에서 학생 고르기
           <select id="pick"></select>
         </label>
@@ -191,14 +194,24 @@ function buildChecks(){
 function paintChecks(){document.querySelectorAll('#checks button[data-i]').forEach(b=>b.setAttribute('aria-pressed',checks[b.dataset.i]===b.dataset.l?'true':'false'))}
 
 /* 리포트 이미지 HTML */
+/* 차시 하나만 고르면 그 차시 카드와 그날 피드백만 들어가요 */
+function fillScope(){
+  const r=curReport(), prev=$('scope').value;
+  const ss=(r&&r.sessions)||[];
+  $('scope').innerHTML='<option value="">한 달 전체 (모든 차시)</option>'+ss.map((x,i)=>`<option value="${i}">${esc(x.no)}차시 · ${esc(x.book)}</option>`).join('');
+  if(prev!==''&&+prev<ss.length)$('scope').value=prev;
+}
+function oneNo(){const r=curReport(),v=$('scope').value;return r&&v!==''&&r.sessions[+v]?r.sessions[+v].no:''}
+function viewReport(r){const v=$('scope').value;if(!r||v===''||!r.sessions[+v])return r;return {...r,sessions:[r.sessions[+v]],_one:r.sessions[+v].no}}
 function reportHTML(r,student,text){
+  r=viewReport(r);
   const m=r.month?Number(r.month.split('-')[1]):0;
   const cards=(r.sessions||[]).map(s=>`<div class="card">${coverSrc(s)?`<img src="${esc(coverSrc(s))}" alt="">`:'<div class="noimg"></div>'}<div class="body">
     <span class="tag"><i>${esc(s.no)}차시</i>${esc(s.type)}</span><div class="book">${esc(s.book)}</div><div class="res">${esc(s.result)}</div>
     ${(s.competencies||[]).map(c=>`<span class="chip"># ${esc(c)}</span>`).join('')}
     ${s.curriculum?`<div class="meta">교과 연계 · ${esc(s.curriculum)}</div>`:''}</div></div>`).join('');
-  const fb=!String(text||'').trim()?'':`<div class="fb"><h4><span>${esc(student||'○○○')}</span> 학생의 ${m?m+'월':'이번 달'} 수업 모습</h4><p class="msg">${esc(text)}</p></div>`;
-  return `<div class="rp"><div class="top"><div><div class="lv">${esc(r.stageLabel||r.stage)}</div><h3>이번 달 이런 수업을<br>했어요</h3></div><div class="mon"><b>${esc(r.period||(m+'월'))}</b>${r.source==='수업계획안'?'수업 이야기':'활동리포트'}</div></div>${cards}${fb}</div>`;
+  const fb=!String(text||'').trim()?'':`<div class="fb"><h4><span>${esc(student||'○○○')}</span> 학생의 ${m?m+'월':'이번 달'}${r._one?' '+esc(r._one)+'차시':''} 수업 모습</h4><p class="msg">${esc(text)}</p></div>`;
+  return `<div class="rp"><div class="top"><div><div class="lv">${esc(r.stageLabel||r.stage)}</div><h3>${r._one?'오늘은 이런 수업을':'이번 달 이런 수업을'}<br>했어요</h3></div><div class="mon"><b>${esc(r.period||(m+'월'))}${r._one?' · '+esc(r._one)+'차시':''}</b>${r.source==='수업계획안'?'수업 이야기':'활동리포트'}</div></div>${cards}${fb}</div>`;
 }
 function coverSrc(s){return s.coverId?'covers/a_'+s.coverId+'.jpg':(s.cover?'covers/'+s.cover:'')}
 const CATS=['정규과정','몰입독서','초등특강','통사 특강','중등특강'];
@@ -217,7 +230,7 @@ function fillPeriods(){
   const ids=Object.keys(reports).filter(id=>reports[id].stage===$('stage').value).sort((a,b)=>{const A=reports[a],B=reports[b];return (B.month||'').localeCompare(A.month||'')||(A.ho||0)-(B.ho||0)});
   $('report').innerHTML=ids.map(id=>`<option value="${esc(id)}">${esc(reports[id].period||reports[id].month)}${reports[id].month?' ('+reports[id].month.slice(0,4)+')':''}</option>`).join('');
   if(prev&&ids.includes(prev))$('report').value=prev;
-  render(); renderSaved();
+  fillScope(); render(); renderSaved();
 }
 function render(){
   const r=curReport(); const box=$('preview');
@@ -234,11 +247,12 @@ function ruleText(name){
   ['상','중','하'].forEach(l=>ITEMS.forEach((it,k)=>{if(checks[it]===l){const arr=PH[it][l];parts.push(arr[(seed+k)%arr.length])}}));
   const memo=$('memo').value.trim();
   if(!parts.length&&!memo) return '';
-  const who=name?`${name} 학생은`:'이번 달 우리 아이는';
+  const when=oneNo()?'오늘':'이번 달';
+  const who=name?`${name} 학생은`:`${when} 우리 아이는`;
   let out='';
-  if(parts.length){parts[0]=`이번 달 ${who} ${parts[0]}`;out=parts.map(p=>p+'.').join(' ')}
+  if(parts.length){parts[0]=name?`${when} ${who} ${parts[0]}`:`${who} ${parts[0]}`;out=parts.map(p=>p+'.').join(' ')}
   if(memo) out+=(out?' ':'')+(/[.!?요]$/.test(memo)?memo:memo+'.');
-  return out+' 다음 달에도 따뜻한 응원 부탁드려요.';
+  return out+(oneNo()?' 다음 수업에서도 따뜻하게 지켜봐 주세요.':' 다음 달에도 따뜻한 응원 부탁드려요.');
 }
 function makeText(){
   const name=$('student').value.trim(); const r=curReport();
@@ -257,7 +271,7 @@ async function savePng(){
   try{ await document.fonts.ready; await Promise.all([...cap.images].map(i=>i.complete?0:new Promise(ok=>{i.onload=i.onerror=ok})));
     const canvas=await html2canvas(cap.firstElementChild,{scale:1.5,useCORS:true,backgroundColor:'#f6f1ea'});
     const blob=await new Promise(ok=>canvas.toBlob(ok,'image/png'));
-    const fn=`${r.stage}_${r.period||r.month}_${$('student').value.trim()||'반공통'}.png`.replace(/\s+/g,'');
+    const fn=`${r.stage}_${r.period||r.month}${oneNo()?'_'+oneNo()+'차시':''}_${$('student').value.trim()||'반공통'}.png`.replace(/\s+/g,'');
     if(dl){ await dl.save({filename:fn,data:blob}); status('이미지를 저장했어요.'); }
     else { const url=URL.createObjectURL(blob); $('preview').innerHTML=`<img src="${url}" alt="저장용 이미지" style="width:100%;display:block">`; $('previewBox').style.height=''; status('이미지를 길게 눌러(또는 오른쪽 클릭) 저장해 주세요.'); }
   }catch(e){ status(e&&e.code==='declined'?'저장을 취소했어요.':'이미지를 만들지 못했어요. 잠시 뒤 다시 눌러 주세요.',true) }
@@ -270,7 +284,8 @@ function status(m,err){const s=$('status');s.textContent=m;s.classList.toggle('e
 /* 시작 */
 buildChecks();
 ['student','text'].forEach(id=>$(id).addEventListener('input',render));
-$('report').addEventListener('change',()=>{ls.set('fb_report',$('report').value);render()});
+$('report').addEventListener('change',()=>{ls.set('fb_report',$('report').value);$('scope').value='';fillScope();render()});
+$('scope').addEventListener('change',()=>{render();if($('text').value.trim())status('범위를 바꿨어요. 문장 만들기를 다시 누르면 문장도 맞춰져요.')});
 $('stage').addEventListener('change',()=>{ls.set('fb_stage',$('stage').value);fillPeriods()});
 $('gen').onclick=()=>{variant=0;makeText()};
 $('alt').onclick=()=>{variant++;makeText()};
@@ -301,7 +316,7 @@ window.__receiveClasses=function(classes){
 $('pick').addEventListener('change',()=>{
   const p=rosterStudents[+$('pick').value]; if(!p) return;
   $('student').value=/팀\d*$/.test(p.name.replace(/\s+/g,''))?'':p.name;
-  if(p.rid&&reports[p.rid]){$('stage').value=reports[p.rid].stage;fillPeriods();$('report').value=p.rid;ls.set('fb_stage',$('stage').value);ls.set('fb_report',p.rid)}
+  if(p.rid&&reports[p.rid]){$('stage').value=reports[p.rid].stage;fillPeriods();$('report').value=p.rid;fillScope();ls.set('fb_stage',$('stage').value);ls.set('fb_report',p.rid)}
   checks={};paintChecks();$('memo').value='';$('text').value='';variant=0;render();
   status(p.rid?`${p.name} 학생의 과정을 골랐어요. 체크하고 '문장 만들기'를 눌러 주세요.`:`${p.label} 과정의 활동리포트가 아직 없어요. 과정과 월·호를 직접 골라 주세요.`,!p.rid);
 });
