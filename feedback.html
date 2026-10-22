@@ -308,12 +308,13 @@ async function savePng(){
   if(!window.html2canvas){status('이미지 도구를 불러오지 못했어요. 새로고침 후 다시 눌러 주세요.',true);return}
   status('이미지를 만들고 있어요…');
   const cap=$('capture'); cap.innerHTML=reportHTML(r,$('student').value.trim(),$('text').value.trim());
-  try{ await document.fonts.ready; await Promise.all([...cap.images].map(i=>i.complete?0:new Promise(ok=>{i.onload=i.onerror=ok})));
+  try{ await document.fonts.ready; await Promise.all([...cap.querySelectorAll('img')].map(i=>i.complete?0:new Promise(ok=>{i.onload=i.onerror=ok})));
     const canvas=await html2canvas(cap.firstElementChild,{scale:1.5,useCORS:true,backgroundColor:'#f6f1ea'});
     const blob=await new Promise(ok=>canvas.toBlob(ok,'image/png'));
     const fn=`${r.stage}_${r.period||r.month}${oneNo()?'_'+oneNo()+'차시':''}_${$('student').value.trim()||'반공통'}.png`.replace(/\s+/g,'');
-    if(dl){ await dl.save({filename:fn,data:blob}); status('이미지를 저장했어요.'); }
-    else { const url=URL.createObjectURL(blob); $('preview').innerHTML=`<img src="${url}" alt="저장용 이미지" style="width:100%;display:block">`; $('previewBox').style.height=''; status('이미지를 길게 눌러(또는 오른쪽 클릭) 저장해 주세요.'); }
+    const showImg=()=>{ const url=URL.createObjectURL(blob); $('preview').innerHTML=`<img src="${url}" alt="저장용 이미지" style="width:100%;display:block;-webkit-touch-callout:default">`; $('previewBox').style.height=''; $('previewBox').scrollIntoView({behavior:'smooth',block:'start'}); status('이미지를 길게 눌러(컴퓨터는 오른쪽 클릭) 저장해 주세요. 다시 고치면 미리보기로 돌아가요.'); };
+    if(dl){ try{ await dl.save({filename:fn,data:blob}); status('이미지를 저장했어요.'); }catch(err){ if(err&&err.code==='declined'){status('저장을 취소했어요.')}else{showImg()} } }
+    else { showImg(); }
   }catch(e){ status(e&&e.code==='declined'?'저장을 취소했어요.':'이미지를 만들지 못했어요. 잠시 뒤 다시 눌러 주세요.',true) }
   finally{ cap.innerHTML='' }
 }
