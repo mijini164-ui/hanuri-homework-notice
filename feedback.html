@@ -34,6 +34,10 @@ h2{font-size:1.05rem;margin:0;font-weight:700}
 label.f{display:flex;flex-direction:column;gap:5px;font-size:.85rem;color:var(--muted);font-weight:500}
 select,input[type=text],textarea{font:inherit;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:10px 12px;width:100%}
 textarea{resize:vertical;min-height:120px;line-height:1.7}
+.f>span{font-size:.85rem;color:var(--muted);font-weight:500}
+.closings{display:flex;flex-wrap:wrap;gap:6px;margin-top:5px}
+.cl{font:inherit;font-size:.85rem;border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:999px;padding:6px 12px;cursor:pointer;text-align:left}
+.cl[aria-pressed=true]{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:700}
 select:focus,input:focus,textarea:focus,button:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
 .two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .checks{display:flex;flex-direction:column;gap:8px}
@@ -124,6 +128,7 @@ select:focus,input:focus,textarea:focus,button:focus-visible{outline:2px solid v
         <div class="step">3단계</div>
         <h2 id="s3">학부모님께 보낼 문장</h2>
         <div class="btns"><button class="btn primary" id="gen" type="button">문장 만들기</button><button class="btn" id="alt" type="button">다른 표현으로</button></div>
+        <div class="f" id="clWrap"><span>마지막 인사말 (눌러서 골라요)</span><div class="closings" id="closings"></div></div>
         <textarea id="text" placeholder="‘문장 만들기’를 누르면 체크한 항목이 미리 만들어 둔 따뜻한 문장으로 바뀌어요. 직접 고쳐 써도 돼요. 비워 두면 이미지에 피드백 칸이 나오지 않아요."></textarea>
         <div class="btns">
           <button class="btn primary" id="png" type="button">이미지 저장</button>
@@ -242,17 +247,38 @@ function fit(){const rp=$('preview').querySelector('.rp');if(!rp)return;const w=
 addEventListener('resize',fit);
 
 /* 문장 만들기: 미리 만들어 둔 문장에서 골라요 (Claude 사용량이 들지 않아요) */
+const CLOSINGS=['책 읽는 사람이 세상을 이끌어 가요.','책 읽는 아이를 많이 응원해 주세요.','다음 달에도 따뜻한 응원 부탁드려요.','집에서도 오늘 읽은 책 이야기를 함께 나눠 주세요.','아이의 생각이 자라는 모습을 함께 지켜봐 주세요.','한 권 한 권 쌓이는 독서가 아이의 큰 힘이 될 거예요.','늘 믿고 보내 주셔서 감사합니다.','다음 수업에서 더 반짝이는 모습으로 만나요.'];
+let closing=(()=>{try{const v=localStorage.getItem('fb_closing');return v===null?CLOSINGS[0]:v}catch(e){return CLOSINGS[0]}})();
+function buildClosings(){
+  $('closings').innerHTML=CLOSINGS.concat(['']).map((c,i)=>`<button type="button" class="cl" data-c="${i}" aria-pressed="${c===closing}">${c?esc(c):'인사말 없이'}</button>`).join('');
+}
+function setClosing(c){
+  const t=$('text').value, prev=closing; closing=c;
+  try{localStorage.setItem('fb_closing',c)}catch(e){}
+  if(t.trim()){
+    let body=t.trimEnd(); if(prev&&body.endsWith(prev)) body=body.slice(0,-prev.length).trimEnd();
+    $('text').value=body+(c?' '+c:''); render();
+  }
+  buildClosings();
+}
+/* 첫머리: 그날(또는 이번 달) 수업 내용 */
+function lessonIntro(name){
+  const r=viewReport(curReport()); if(!r) return '';
+  const who=name?`${name} 친구와`:'친구들과';
+  const ss=r.sessions||[];
+  if(r._one&&ss[0]){const x=ss[0];return `${who} 《${x.book}》 책을 읽고 수업했어요. ${String(x.result||'').trim()}`.trim()}
+  const books=[...new Set(ss.map(x=>x.book))];
+  return books.length?`이번 달에는 ${who} ${books.map(b=>'《'+b+'》').join(', ')} 책을 읽고 수업했어요.`:'';
+}
 function ruleText(name){
   const seed=nameSeed(name)+variant;const parts=[];
   ['상','중','하'].forEach(l=>ITEMS.forEach((it,k)=>{if(checks[it]===l){const arr=PH[it][l];parts.push(arr[(seed+k)%arr.length])}}));
   const memo=$('memo').value.trim();
   if(!parts.length&&!memo) return '';
-  const when=oneNo()?'오늘':'이번 달';
-  const who=name?`${name} 학생은`:`${when} 우리 아이는`;
-  let out='';
-  if(parts.length){parts[0]=name?`${when} ${who} ${parts[0]}`:`${who} ${parts[0]}`;out=parts.map(p=>p+'.').join(' ')}
+  let out=lessonIntro(name);
+  if(parts.length){parts[0]=`${name?name+' 학생은':'우리 아이는'} ${parts[0]}`;out+=(out?' ':'')+parts.map(p=>p+'.').join(' ')}
   if(memo) out+=(out?' ':'')+(/[.!?요]$/.test(memo)?memo:memo+'.');
-  return out+(oneNo()?' 다음 수업에서도 따뜻하게 지켜봐 주세요.':' 다음 달에도 따뜻한 응원 부탁드려요.');
+  return out+(closing?' '+closing:'');
 }
 function makeText(){
   const name=$('student').value.trim(); const r=curReport();
@@ -287,6 +313,8 @@ buildChecks();
 $('report').addEventListener('change',()=>{ls.set('fb_report',$('report').value);$('scope').value='';fillScope();render()});
 $('scope').addEventListener('change',()=>{render();if($('text').value.trim())status('범위를 바꿨어요. 문장 만들기를 다시 누르면 문장도 맞춰져요.')});
 $('stage').addEventListener('change',()=>{ls.set('fb_stage',$('stage').value);fillPeriods()});
+buildClosings();
+$('closings').addEventListener('click',e=>{const b=e.target.closest('.cl');if(!b)return;const i=+b.dataset.c;setClosing(i<CLOSINGS.length?CLOSINGS[i]:'')});
 $('gen').onclick=()=>{variant=0;makeText()};
 $('alt').onclick=()=>{variant++;makeText()};
 $('png').onclick=savePng;$('copy').onclick=copyText;
