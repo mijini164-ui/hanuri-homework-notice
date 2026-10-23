@@ -1,6 +1,6 @@
 /* 피드백 탭: 반 공통 피드백 + 학생별 개인 피드백 → 학부모님께 보낼 완성본(문장·이미지).
    흐름: 반 고르기(pickClass) → 공통(#common) → 학생 고르기(selectStudent)·체크·직접 쓰기 → 합치기(compose) → 복사·이미지(savePng)
-   활동리포트 자료는 data/reports.js, 표지 그림은 covers/ 에 있어요. 적은 내용은 이 기기 브라우저(localStorage 'fb_store_v2')에 남아요. */
+   활동리포트 자료는 data/reports.js, 표지 그림은 covers/ 에 있어요. 적은 내용은 화면을 열어 둔 동안만 기억하고 새로고침하면 지워져요. */
 const { esc, tell, onParent } = Suite;
 const ITEMS=['필독서 이해','협동심','어휘력','토론능력','수업 참여도','발표','글쓰기'];
 const LV=['상','중','하'];
@@ -40,11 +40,11 @@ const $=id=>document.getElementById(id);
 let dl=null, reports={...(window.REPORTS||{})};
 const ls={get(k){try{return localStorage.getItem(k)}catch(e){return null}},set(k,v){try{localStorage.setItem(k,v)}catch(e){}}};
 
-/* 저장: 반마다 공통 피드백, 학생마다 개인 피드백(체크·직접 쓴 말·고친 완성본). 이 기기 브라우저에만 남아요. */
-const STORE_KEY='fb_store_v2';
-const store=(()=>{try{const o=JSON.parse(localStorage.getItem(STORE_KEY)||'{}');return {common:o.common||{},stu:o.stu||{},names:o.names||{}}}catch(e){return {common:{},stu:{},names:{}}}})();
-let saveT=0;
-function persist(){clearTimeout(saveT);saveT=setTimeout(()=>ls.set(STORE_KEY,JSON.stringify(store)),250)}
+/* 적은 내용: 반마다 공통 피드백, 학생마다 개인 피드백(체크·직접 쓴 말·고친 완성본).
+   이 화면을 열어 둔 동안만 기억하고, 새로고침하거나 다시 열면 모두 지워져요(기기에 저장하지 않아요). */
+try{localStorage.removeItem('fb_store_v2')}catch(e){}  /* 예전 버전이 기기에 남겨 둔 내용도 지워요 */
+const store={common:{},stu:{},names:{}};
+function persist(){}
 
 /* 지금 고른 반과 학생 */
 let classes=[];      /* 반 명단에서 온 반: {label, names, rid, time} */
@@ -80,7 +80,7 @@ function reportHTML(r,student,text){
     ${(s.competencies||[]).map(c=>`<span class="chip"># ${esc(c)}</span>`).join('')}
     ${s.curriculum?`<div class="meta">교과 연계 · ${esc(s.curriculum)}</div>`:''}</div></div>`).join('');
   const fb=!String(text||'').trim()?'':`<div class="fb"><h4><span>${esc(student||'○○○')}</span> 학생의 ${m?m+'월':'이번 달'}${r._one?' '+esc(r._one)+'차시':''} 수업 모습</h4><p class="msg">${esc(text)}</p></div>`;
-  return `<div class="rp"><div class="top"><div><div class="lv">${esc(r.stageLabel||r.stage)}</div><h3>${r._one?'오늘은 이런 수업을':'이번 달 이런 수업을'}<br>했어요</h3></div><div class="mon"><b>${esc(r.period||(m+'월'))}${r._one?' · '+esc(r._one)+'차시':''}</b>${r.source==='수업계획안'?'수업 이야기':'활동리포트'}</div></div>${cards}${fb}</div>`;
+  return `<div class="rp"><div class="top"><div><div class="lv">${esc(r.stageLabel||r.stage)}</div><h3>${r._one?'이런 수업을':'이번 달 이런 수업을'}<br>했어요</h3></div><div class="mon"><b>${esc(r.period||(m+'월'))}${r._one?' · '+esc(r._one)+'차시':''}</b>${r.source==='수업계획안'?'수업 이야기':'활동리포트'}</div></div>${cards}${fb}</div>`;
 }
 function coverSrc(s){return s.coverId?'covers/a_'+s.coverId+'.jpg':(s.cover?'covers/'+s.cover:'')}
 const CATS=['정규과정','몰입독서','초등특강','통사 특강','중등특강'];
@@ -172,7 +172,8 @@ function drawAll(){
 function selectStudent(name){
   cur.name=name||'';
   $('stuBox').hidden=false;
-  $('prev').parentElement.hidden=namesOf().length<2;
+  $('prev').hidden=$('next').hidden=namesOf().length<2;
+  $('clearStu').textContent=cur.name?'이 학생 지우기':'지우고 다음 친구 쓰기';
   $('who').innerHTML=cur.name?'<span>'+esc(cur.name)+'</span> 학생':'학생 이름 없이 쓰기 <small class="hint">(위에서 이름을 추가하면 학생마다 따로 남아요)</small>';
   {const d=stuData(cur.name);$('memo').value=d.memo||'';$('text').value=finalText(cur.name)}
   paintChecks(); autoH(); changed();
@@ -251,6 +252,9 @@ $('gen').onclick=()=>{const d=stuData(cur.name);d.edited=false;d.text='';changed
 $('alt').onclick=()=>{const d=stuData(cur.name);if(!Object.keys(d.checks).length){status('체크한 항목이 있을 때 다른 표현으로 바꿀 수 있어요.',true);return}d.variant=(d.variant||0)+1;d.edited=false;changed()};
 $('chips').addEventListener('click',e=>{const b=e.target.closest('[data-n]');if(b)selectStudent(b.dataset.n)});
 function step(dir){const ns=namesOf();if(!ns.length)return;const i=ns.indexOf(cur.name);selectStudent(ns[(i+dir+ns.length)%ns.length]);$('stuBox').scrollIntoView({behavior:'smooth',block:'nearest'})}
+/* 이 학생(또는 이름 없이 쓰는 칸)의 체크·직접 쓴 말·고친 완성본을 지우고 새로 써요 */
+$('clearStu').onclick=()=>{const k=cur.key;if(store.stu[k])delete store.stu[k][cur.name];$('memo').value='';paintChecks();changed();
+  status(cur.name?cur.name+' 학생 피드백을 지웠어요.':'지웠어요. 다음 친구 피드백을 써 주세요.')};
 $('prev').onclick=()=>step(-1);$('next').onclick=()=>step(1);
 function addName(){const n=$('student').value.trim();if(!n)return;const list=store.names[cur.key]=store.names[cur.key]||[];if(!namesOf().includes(n))list.push(n);$('student').value='';persist();selectStudent(n)}
 $('addName').onclick=addName;$('student').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();addName()}});
