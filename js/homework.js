@@ -316,7 +316,7 @@ function cardHTML(c, idx) {
   const dropped = c.segs.filter(s => s.course >= 0 && !(state.hw && state.hw[s.course])).map(s => CATALOG.courses[s.course].full);
   if (hasHw && dropped.length) notes.push(dropped.join(", ") + "은(는) 숙제가 없어서 안내문에서 뺐어요.");
   if (c.k < 0.8) notes.push("내용이 많아서 글자를 조금 작게 넣었어요.");
-  if (c.countGuess) warns.push("팀 이름으로 적혀 있어서 학생 수를 알 수 없어요. 오른쪽 '장 수'를 학생 수로 바꿔 주세요. (엑셀에 '인원' 칸을 만들어 적으면 자동으로 맞춰요.)");
+  if (c.countGuess) warns.push("팀 이름으로 적혀 있어서 학생 수를 알 수 없어요. 오른쪽 '학생 수'를 바꿔 주세요. (엑셀에 '인원' 칸을 만들어 적으면 자동으로 맞춰요.)");
   const segs = c.segs.map((s, si) => '<div class="seg"><div class="dates"><b>' + esc(s.stage || "단계 없음") + "</b><br>" + (s.dates.map(d => d[1] + "/" + d[2]).join(", ") || "수업일 없음") + "</div>" +
     '<label for="crs-' + idx + "-" + si + '">과정<select id="crs-' + idx + "-" + si + '" data-i="' + idx + '" data-s="' + si + '">' + courseOptions(s.course) + "</select></label></div>").join("");
   const pages = Math.ceil(c.copies / 2);
@@ -329,9 +329,9 @@ function cardHTML(c, idx) {
   }
   return '<article class="cls' + (c.include ? "" : " off") + '" id="cls-' + idx + '">' +
     '<div class="cls-head"><label class="inc" for="inc-' + idx + '"><input type="checkbox" id="inc-' + idx + '" data-inc="' + idx + '"' + (c.include ? " checked" : "") + ">" + esc(c.names.join(", ") || "이름 없음") + "</label>" +
-    '<label class="copies" for="cp-' + idx + '">장 수<input type="number" min="1" max="40" id="cp-' + idx + '" data-cp="' + idx + '" value="' + c.copies + '"></label></div>' +
+    '<label class="copies" for="cp-' + idx + '">학생 수<input type="number" min="1" max="40" id="cp-' + idx + '" data-cp="' + idx + '" value="' + c.copies + '"></label></div>' +
     '<div class="meta"><span class="pill">' + esc(v.title.replace(/ 숙제$/, "")) + "</span>" + '<span class="pill hw">숙제 있음</span>' +
-    '<span class="pill">A4 ' + pages + "쪽" + (c.copies % 2 ? " · 남는 반쪽은 예비용" : "") + "</span></div>" +
+    '<span class="pill print">인쇄 A4 ' + pages + "장" + (c.copies % 2 ? " (남는 반쪽은 예비용)" : "") + "</span></div>" +
     warns.map(w => '<div class="warn">' + esc(w) + "</div>").join("") + notes.map(n => '<div class="note">' + esc(n) + "</div>").join("") +
     '<div class="segs">' + segs + "</div>" +
     '<p class="hint">미리보기에서 점선 글자(제목·수업시간·필독서·소주제·숙제)를 누르면 바로 고칠 수 있어요.</p>' +
@@ -354,7 +354,7 @@ function updateSummary() {
   const on = state.classes.filter(c => c.include);
   const pages = on.reduce((a, c) => a + Math.ceil(c.copies / 2), 0);
   document.getElementById("sumText").textContent = state.example ? "예시를 보고 있어요. 엑셀 두 개를 올리면 반마다 나와요."
-    : on.length ? on.length + "개 반 · A4 " + pages + "쪽" : "저장할 반을 체크해 주세요";
+    : on.length ? on.length + "개 반 · 인쇄 A4 " + pages + "장" : "저장할 반을 체크해 주세요";
   document.querySelectorAll("#savePdf,#savePng,#saveXlsx").forEach(b => b.disabled = state.example || !on.length);
 }
 
@@ -377,7 +377,7 @@ function rebuild() {
     else msg += " 숙제가 있는 " + nHw + "개 반을 미리 체크해 두었어요." + (nNo ? " 숙제가 없는 " + nNo + "개 반은 숙제를 적으면 안내문이 만들어져요." : "");
     if (state.hwUnknown.length) msg += " 숙제 엑셀의 '" + state.hwUnknown.join("', '") + "' 단계는 이번 달 계획안에서 찾지 못했어요.";
     document.getElementById("status").textContent = msg;
-    document.getElementById("resHint").textContent = "체크한 반만 저장돼요. 장 수는 학생 수로 맞춰 두었고, 한 쪽에 두 장씩 들어가요.";
+    document.getElementById("resHint").textContent = "체크한 반만 저장돼요. 학생 수는 반 명단으로 맞춰 두었어요. A4 한 장에 안내문이 두 개 들어가서, 학생 2명당 A4 1장만 인쇄돼요(3명이면 2장).";
     renderHwEditor();
     loadFonts().then(renderAll);
   } catch (e) {
@@ -466,7 +466,7 @@ function blankHomeworkBook() {
 function savedHomeworkBook(on) {
   const cis = [...new Set([...rosterCourses(), ...Object.keys(state.hwText).map(Number)])]
     .filter(ci => CATALOG.courses[ci] && Object.values(state.hwText[ci] || {}).some(x => String(x || "").trim()));
-  const rows = [["반", "수업시간", "장 수", "과정", "차시", "날짜", "요일", "필독서", "소주제", "숙제"]];
+  const rows = [["반", "수업시간", "학생 수", "과정", "차시", "날짜", "요일", "필독서", "소주제", "숙제"]];
   on.forEach(c => {
     const v = viewOf(c), name = c.names.join(", ");
     v.rows.forEach(r => {

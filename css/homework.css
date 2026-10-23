@@ -127,3 +127,5 @@ button.ghost{background:transparent;color:var(--fg);border-color:var(--line)}
 .hwr .hwl small{display:block;color:var(--muted);font-size:12px}
 .hwr textarea{font:inherit;font-size:14px;color:var(--fg);background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:7px 10px;width:100%;min-width:0;resize:vertical;line-height:1.5;min-height:58px}
 @media (max-width:560px){.hwr{grid-template-columns:1fr}}
+
+.pill.print{background:#1f2a4a;color:#fff;font-weight:700}
