@@ -251,7 +251,8 @@ document.getElementById("saveAll").addEventListener("click", async e => {
     used.add(n); zip.file(n, c.blob); });
   const blob = await zip.generateAsync({ type: "blob" });
   btn.disabled = false;
-  saveBlob(CATALOG.month + "월_수업계획서_전체.zip", blob, btn);
+  const ms = [...new Set(state.classes.flatMap(c => c.segs.flatMap(s => s.dates.map(d => d.m))))].sort((x, y) => x - y);
+  saveBlob((ms.length ? ms.join("·") : CATALOG.month) + "월_수업계획서_전체.zip", blob, btn);
 });
 
 async function handleFile(f) {

@@ -167,7 +167,7 @@ function drawAll(){
   const ns=namesOf();
   $('all').innerHTML=ns.length?ns.map(n=>{const d=(store.stu[cur.key]||{})[n];const t=finalText(n);const per=hasPersonal(d)||(d&&d.edited);
     return `<div class="row"><b>${esc(n)}<span class="tag${per?' ok':''}">${per?'개인 피드백 있음':'공통만'}</span></b><button type="button" class="btn small" data-copy="${esc(n)}">복사</button><p>${esc(t)||'아직 피드백이 없어요.'}</p></div>`}).join(''):'<p class="hint">학생을 추가하면 여기에 모두 모여요.</p>';
-  $('copyAll').disabled=!ns.length;
+  $('copyAll').disabled=!ns.length;$('pngAll').disabled=!ns.length;
 }
 function selectStudent(name){
   cur.name=name||'';
@@ -204,6 +204,34 @@ async function savePng(){
   }catch(e){ status(e&&e.code==='declined'?'저장을 취소했어요.':'이미지를 만들지 못했어요. 잠시 뒤 다시 눌러 주세요.',true) }
   finally{ cap.innerHTML='' }
 }
+/* 반 전체 이미지: 학생마다 완성본이 들어간 이미지를 만들어 zip 파일 하나로 저장해요 (컴퓨터용) */
+async function imageBlob(r,name,text){
+  const cap=$('capture'); cap.innerHTML=reportHTML(r,name,text);
+  await document.fonts.ready; await Promise.all([...cap.querySelectorAll('img')].map(i=>i.complete?0:new Promise(ok=>{i.onload=i.onerror=ok})));
+  const canvas=await html2canvas(cap.firstElementChild,{scale:1.5,useCORS:true,backgroundColor:'#f6f1ea'});
+  return await new Promise(ok=>canvas.toBlob(ok,'image/png'));
+}
+async function savePngAll(){
+  const r=curReport(); if(!r){status('먼저 반이나 과정을 골라 주세요.',true);return}
+  const ns=namesOf();
+  if(!ns.length){status('학생 이름이 있어야 반 전체를 한꺼번에 저장할 수 있어요. 위에서 이름을 추가하거나 \'이미지 저장\'을 눌러 주세요.',true);return}
+  if(!window.html2canvas||!window.JSZip){status('저장 도구를 불러오지 못했어요. 새로고침 후 다시 눌러 주세요.',true);return}
+  const btn=$('pngAll'); btn.disabled=true;
+  const base=`${r.stage}_${r.period||r.month}${oneNo()?'_'+oneNo()+'차시':''}`.replace(/\s+/g,'');
+  try{
+    const zip=new JSZip(), used=new Set();
+    for(let i=0;i<ns.length;i++){
+      status(`이미지를 만들고 있어요… (${i+1}/${ns.length}명)`);
+      let fn=`${base}_${ns[i]}`.replace(/[\\/:*?"<>|\s]+/g,''),k=2; while(used.has(fn))fn=`${base}_${ns[i]}(${k++})`.replace(/[\\/:*?"<>|\s]+/g,''); used.add(fn);
+      zip.file(fn+'.png',await imageBlob(r,ns[i],finalText(ns[i]).trim()));
+    }
+    const blob=await zip.generateAsync({type:'blob'}), zn=`${base}_반전체_${ns.length}명.zip`;
+    if(!dl){status('이 화면에서는 파일로 저장할 수 없어요. 학생마다 \'이미지 저장\'을 눌러 주세요.',true);return}
+    try{await dl.save({filename:zn,data:blob});status(`${ns.length}명 이미지를 zip 파일 하나로 저장했어요. 압축을 풀면 학생마다 한 장씩 있어요.`)}
+    catch(err){if(err&&err.code==='declined')status('저장을 취소했어요.');else status('휴대폰에서는 한꺼번에 저장이 잘 안 돼요. 컴퓨터에서 하시거나, 학생마다 \'이미지 저장\'을 눌러 주세요.',true)}
+  }catch(e){status('이미지를 만들지 못했어요. 잠시 뒤 다시 눌러 주세요.',true)}
+  finally{$('capture').innerHTML='';btn.disabled=false}
+}
 async function copyOut(t,okMsg){
   if(!String(t||'').trim()){status('복사할 문장이 아직 없어요.',true);return}
   try{await navigator.clipboard.writeText(t);status(okMsg)}catch(e){$('text').select();status('복사하지 못했어요. 완성본 칸을 길게 눌러 복사해 주세요.',true)}
@@ -229,7 +257,7 @@ $('addName').onclick=addName;$('student').addEventListener('keydown',e=>{if(e.ke
 $('all').addEventListener('click',e=>{const b=e.target.closest('[data-copy]');if(b)copyOut(finalText(b.dataset.copy),b.dataset.copy+' 학생 완성본을 복사했어요. 카톡에 붙여 넣으면 돼요.')});
 $('copyAll').onclick=()=>copyOut(namesOf().map(n=>`[${n}]\n${finalText(n)}`).join('\n\n──────────\n\n'),'반 전체 완성본을 복사했어요.');
 $('copy').onclick=()=>copyOut($('text').value.trim(),'문장을 복사했어요. 카톡에 붙여 넣으면 돼요.');
-$('png').onclick=savePng;
+$('png').onclick=savePng;$('pngAll').onclick=savePngAll;
 $('report').addEventListener('change',()=>{ls.set('fb_report',$('report').value);$('scope').value='';fillScope();loadClass()});
 $('scope').addEventListener('change',()=>{render();status('범위를 바꿨어요. 공통 피드백의 \'수업 내용으로 채우기\'를 누르면 그 차시 내용이 들어가요.')});
 $('stage').addEventListener('change',()=>{ls.set('fb_stage',$('stage').value);fillPeriods();loadClass()});

@@ -86,7 +86,7 @@
         <details class="more" id="allWrap" open>
           <summary>반 전체 완성본 모아 보기</summary>
           <div class="inner"><div class="all" id="all"></div>
-            <button type="button" class="btn small" id="copyAll">반 전체 한 번에 복사</button></div>
+            <span class="btns"><button type="button" class="btn small" id="copyAll">반 전체 한 번에 복사</button><button type="button" class="btn small" id="pngAll">반 전체 이미지 한꺼번에 저장 (zip)</button></span></div>
         </details>
       </section>
     </div>
@@ -100,6 +100,7 @@
 <div id="capture" aria-hidden="true"></div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <script src="data/reports.js?v=__V__"></script>
 <script src="js/shared.js?v=__V__"></script>
 <script src="js/feedback.js?v=__V__"></script>
