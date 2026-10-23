@@ -79,7 +79,7 @@ function reportHTML(r,student,text){
     <span class="tag"><i>${esc(s.no)}차시</i>${esc(s.type)}</span><div class="book">${esc(s.book)}</div><div class="res">${esc(s.result)}</div>
     ${(s.competencies||[]).map(c=>`<span class="chip"># ${esc(c)}</span>`).join('')}
     ${s.curriculum?`<div class="meta">교과 연계 · ${esc(s.curriculum)}</div>`:''}</div></div>`).join('');
-  const fb=!String(text||'').trim()?'':`<div class="fb"><h4><span>${esc(student||'○○○')}</span> 학생의 ${m?m+'월':'이번 달'}${r._one?' '+esc(r._one)+'차시':''} 수업 모습</h4><p class="msg">${esc(text)}</p></div>`;
+  const fb=!String(text||'').trim()?'':`<div class="fb"><h4>${m?m+'월':'이번 달'}${r._one?' '+esc(r._one)+'차시':''} 수업 모습</h4><p class="msg">${esc(text)}</p></div>`;
   return `<div class="rp"><div class="top"><div><div class="lv">${esc(r.stageLabel||r.stage)}</div><h3>${r._one?'이런 수업을':'이번 달 이런 수업을'}<br>했어요</h3></div><div class="mon"><b>${esc(r.period||(m+'월'))}${r._one?' · '+esc(r._one)+'차시':''}</b>${r.source==='수업계획안'?'수업 이야기':'활동리포트'}</div></div>${cards}${fb}</div>`;
 }
 function coverSrc(s){return s.coverId?'covers/a_'+s.coverId+'.jpg':(s.cover?'covers/'+s.cover:'')}
