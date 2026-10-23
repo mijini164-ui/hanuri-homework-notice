@@ -200,8 +200,12 @@ async function savePng(){
     const fn=`${r.stage}_${r.period||r.month}${oneNo()?'_'+oneNo()+'차시':''}_${cur.name||'반공통'}.png`.replace(/\s+/g,'');
     const url=await new Promise(ok=>{const fr=new FileReader();fr.onload=()=>ok(fr.result);fr.readAsDataURL(blob)}); /* 카카오톡 등에서도 길게 눌러 저장되게 그림 자체를 넣어요 */
     const showImg=()=>{ $('preview').innerHTML=`<img src="${url}" alt="저장용 이미지" style="width:100%;display:block;-webkit-touch-callout:default">`; $('previewBox').style.height=''; $('previewBox').scrollIntoView({behavior:'smooth',block:'start'}); status('이미지를 길게 눌러(컴퓨터는 오른쪽 클릭) 저장해 주세요. 다시 고치면 미리보기로 돌아가요.'); };
-    if(dl){ try{ await dl.save({filename:fn,data:blob}); status('이미지를 저장했어요.'); }catch(err){ if(err&&err.code==='declined'){status('저장을 취소했어요.')}else{showImg()} } }
-    else { showImg(); }
+    if(dl){ try{ await dl.save({filename:fn,data:blob});
+        /* 컴퓨터에서 브라우저가 자동 다운로드를 막아 둔 경우가 있어서, 그림을 띄우고 '파일로 받기' 단추도 같이 보여 줘요 */
+        if(!window.parent.claude||window.parent===window){ showImg(); statusLink('이미지를 저장했어요. 다운로드 폴더에 없으면 아래 \'파일로 받기\'를 누르거나, 그림을 오른쪽 클릭 → \'이미지를 다른 이름으로 저장\'을 눌러 주세요.',url,fn); }
+        else status('이미지를 저장했어요.');
+      }catch(err){ if(err&&err.code==='declined'){status('저장을 취소했어요.')}else{showImg();statusLink('이미지를 길게 눌러(컴퓨터는 오른쪽 클릭) 저장하거나 \'파일로 받기\'를 눌러 주세요.',url,fn)} } }
+    else { showImg(); statusLink('이미지를 길게 눌러(컴퓨터는 오른쪽 클릭) 저장하거나 \'파일로 받기\'를 눌러 주세요.',url,fn); }
   }catch(e){ status(e&&e.code==='declined'?'저장을 취소했어요.':'이미지를 만들지 못했어요. 잠시 뒤 다시 눌러 주세요.',true) }
   finally{ cap.innerHTML='' }
 }
@@ -228,7 +232,8 @@ async function savePngAll(){
     }
     const blob=await zip.generateAsync({type:'blob'}), zn=`${base}_반전체_${ns.length}명.zip`;
     if(!dl){status('이 화면에서는 파일로 저장할 수 없어요. 학생마다 \'이미지 저장\'을 눌러 주세요.',true);return}
-    try{await dl.save({filename:zn,data:blob});status(`${ns.length}명 이미지를 zip 파일 하나로 저장했어요. 압축을 풀면 학생마다 한 장씩 있어요.`)}
+    const zurl=URL.createObjectURL(blob);
+    try{await dl.save({filename:zn,data:blob});statusLink(`${ns.length}명 이미지를 zip 파일 하나로 저장했어요. 압축을 풀면 학생마다 한 장씩 있어요. 다운로드 폴더에 없으면 '파일로 받기'를 눌러 주세요.`,zurl,zn)}
     catch(err){if(err&&err.code==='declined')status('저장을 취소했어요.');else status('휴대폰에서는 한꺼번에 저장이 잘 안 돼요. 컴퓨터에서 하시거나, 학생마다 \'이미지 저장\'을 눌러 주세요.',true)}
   }catch(e){status('이미지를 만들지 못했어요. 잠시 뒤 다시 눌러 주세요.',true)}
   finally{$('capture').innerHTML='';btn.disabled=false}
@@ -238,6 +243,8 @@ async function copyOut(t,okMsg){
   try{await navigator.clipboard.writeText(t);status(okMsg)}catch(e){$('text').select();status('복사하지 못했어요. 완성본 칸을 길게 눌러 복사해 주세요.',true)}
 }
 function status(m,err){const s=$('status');s.textContent=m;s.classList.toggle('err',!!err)}
+/* 안내 글 + '파일로 받기' 단추(직접 누르는 다운로드라 브라우저가 막지 않아요) */
+function statusLink(m,href,fn){status(m);const a=document.createElement('a');a.href=href;a.download=fn;a.className='btn small';a.textContent='파일로 받기';a.style.marginLeft='8px';$('status').appendChild(a)}
 function grow(t,min){t.style.height='auto';t.style.height=Math.max(min,t.scrollHeight+4)+'px'}
 function autoH(){grow($('text'),180);grow($('common'),96)}
 
