@@ -49,6 +49,19 @@ window.Suite = (function () {
   }
   /* 과정 이름 옆에 붙이는 달 표시(두 달 이상 들어 있을 때만): "독서리더1 (10월)" */
   function monthTag(c, catalog) { return c && c.kind === "monthly" && courseMonths(catalog).length > 1 ? " (" + (c.month || catalog.month) + "월)" : ""; }
+  /* 수업월호 칸 읽기: "10월" → {month:10}, "2호" → {ho:2} */
+  function readHo(t) {
+    const x = String(t ?? "").normalize("NFKC"), m = x.match(/(\d{1,2})\s*월/), h = x.match(/(\d{1,2})\s*호/);
+    return { month: m ? +m[1] : 0, ho: h ? +h[1] : 0 };
+  }
+  /* 단계 + 수업월호 → 계획안 과정. 단계에 호수가 없으면 수업월호의 호를 붙이고("몰입P" + "2호"),
+     수업월호에 달이 있으면 그 달 계획안, 없으면 수업일의 달 계획안을 골라요. want = 수업월호에 적은 달 */
+  function courseFor(stage, ho, catalog, dateMonth) {
+    const r = readHo(ho);
+    let st = String(stage ?? "");
+    if (r.ho && !/\d\s*호?\s*$/.test(st.normalize("NFKC").trim())) st = st.trim() + r.ho + "호";
+    return { ci: matchCourse(st, catalog, r.month || dateMonth), want: r.month, stage: st };
+  }
   function matchCourse0(stage, catalog) {
     const n = norm(stage);
     if (!n) return -1;
@@ -89,6 +102,8 @@ window.Suite = (function () {
     const H = rows[hi].map(norm);
     const col = k => H.findIndex(h => h === k || h.startsWith(k));
     const cNo = col("no"), cTeam = col("팀여부"), cName = col("이름"), cTime = col("수업요일"), cStage = col("단계"), cDate = col("수업일");
+    /* 수업월호 칸(선택): "10월"이면 수업일이 11월이어도 10월 계획안, "2호"면 그 호 */
+    const cHo = ["수업월호", "월호", "수업월", "계획안", "수업호"].map(k => H.indexOf(k)).find(i => i >= 0) ?? -1;
     const cMemo = ["특이사항", "특이", "비고", "인사말", "메모", "전달사항", "참고사항", "기타"].map(col).find(i => i >= 0) ?? -1;
     /* 팀 이름으로 적을 때 쓰는 학생 수 칸(인원·학생수·명수) */
     const cCount = H.findIndex(h => h === "인원" || h.startsWith("인원") || h.startsWith("학생수") || h === "명수");
@@ -121,8 +136,9 @@ window.Suite = (function () {
       if (!cur.time && cTime >= 0 && r[cTime]) cur.time = cleanTime(r[cTime]);
       if (!cur.memo && memo) cur.memo = memo;
       if (stage || dates) {
-        const key = norm(stage) + "|" + norm(dates);
-        if (!cur.segs.some(s => s.key === key)) cur.segs.push({ key, stage, dates });
+        const ho = cHo >= 0 ? String(r[cHo] ?? "").trim() : "";
+        const key = norm(stage) + "|" + norm(dates) + "|" + norm(ho);
+        if (!cur.segs.some(s => s.key === key)) cur.segs.push({ key, stage, dates, ho });
       }
     }
     const out = groups.filter(g => g.segs.length);
@@ -136,5 +152,5 @@ window.Suite = (function () {
     if (e.source === parent && e.data && e.data.type === type) fn(e.data);
   });
 
-  return { esc, norm, cleanTime, parseDates, matchCourse, pickMonth, courseMonths, courseGroups, monthTag, readSheetRows, groupRows, tell, onParent };
+  return { esc, norm, cleanTime, parseDates, matchCourse, readHo, courseFor, pickMonth, courseMonths, courseGroups, monthTag, readSheetRows, groupRows, tell, onParent };
 })();

@@ -1,7 +1,7 @@
 /* 수업계획서 탭: 반 명단 엑셀 → 반마다 달력형 수업계획서 이미지(1200px)를 만들어요.
    흐름: 엑셀 올리기(handleFile) → 반 나누기(Suite.groupRows) → 반마다 화면(panelHTML) → 이미지(capture)
    과정·필독서 자료는 data/catalog.js, 엑셀 읽기는 js/shared.js 에 있어요. */
-const { esc, norm, parseDates, matchCourse, courseMonths, courseGroups, readSheetRows, groupRows, tell, onParent } = Suite;
+const { esc, norm, parseDates, matchCourse, courseFor, courseMonths, courseGroups, readSheetRows, groupRows, tell, onParent } = Suite;
 const CATALOG = window.CATALOG;
 const COLORS = ["#1f2a4a", "#e07a3f", "#2f8f6b"];  /* 두세 과정을 번갈아 하는 반의 과정별 색 */
 const WD = "일월화수목금토";
@@ -12,7 +12,8 @@ function defaultMsg(mLabel) {
 
 function buildClass(g, catalog) {
   const segs = g.segs.map(s => { const dates = parseDates(s.dates, catalog.year, catalog.month);
-    return { stage: s.stage, datesText: s.dates, course: s.course ?? matchCourse(s.stage, catalog, dates[0] && dates[0].m), dates }; });
+    const r = courseFor(s.stage, s.ho, catalog, dates[0] && dates[0].m);
+    return { stage: s.stage, ho: s.ho || "", want: r.want, datesText: s.dates, course: s.course ?? r.ci, dates }; });
   return { names: g.names, time: g.time, memo: g.memo || "", segs, title: null };
 }
 
@@ -40,7 +41,10 @@ function classView(c, catalog) {
   const missing = c.segs.filter(s => s.course < 0).map(s => s.stage);
   const extra = c.segs.filter(s => s.course >= 0 && s.dates.length > catalog.courses[s.course].sessions.length).map(s => catalog.courses[s.course].name);
   const noDates = c.segs.filter(s => !s.dates.length).map(s => s.stage);
-  return { rows, months, mLabel, year, title, legend, missing, extra, noDates,
+  /* 수업월호에 적은 달의 계획안이 아직 없으면 알려요 */
+  const noMonth = c.segs.filter(s => s.want && s.course >= 0 && catalog.courses[s.course].kind === "monthly" && (catalog.courses[s.course].month || catalog.month) !== s.want)
+    .map(s => s.want + "월 " + catalog.courses[s.course].name + " → " + (catalog.courses[s.course].month || catalog.month) + "월");
+  return { rows, months, mLabel, year, title, legend, missing, extra, noDates, noMonth,
     sub: year + "년 " + mLabel, time: c.time,
     msgText: c.memo || defaultMsg(mLabel),
     msg: (c.memo || defaultMsg(mLabel)).replace(/[&<>"]/g, ch => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[ch])).replace(/\r?\n/g, "<br>"),
@@ -142,8 +146,9 @@ function panelHTML(c, idx) {
   const warns = [];
   if (v.missing.length) warns.push("'" + v.missing.join("', '") + "' 단계와 맞는 과정을 찾지 못했어요. 아래에서 과정을 골라 주세요.");
   if (v.extra.length) warns.push(v.extra.join(", ") + " 수업일이 계획안 차시보다 많아요. 넘치는 날은 '책 정보 없음'으로 나와요.");
+  if (v.noMonth.length) warns.push("수업월호에 적은 달의 계획안이 아직 없어서 다른 달 계획안을 넣었어요: " + v.noMonth.join(", ") + ". 아래에서 과정을 확인해 주세요.");
   if (v.noDates.length) warns.push("'" + v.noDates.join("', '") + "' 줄의 수업일을 읽지 못했어요. '11월 4일, 11일'처럼 적어 주세요.");
-  const segs = c.segs.map((s, si) => '<div class="seg"><div class="dates"><b>' + esc(s.stage || "단계 없음") + "</b><br>" + (s.dates.map(d => d.m + "/" + d.d).join(", ") || "수업일 없음") + "</div>" +
+  const segs = c.segs.map((s, si) => '<div class="seg"><div class="dates"><b>' + esc(s.stage || "단계 없음") + (s.ho ? " · " + esc(s.ho) : "") + "</b><br>" + (s.dates.map(d => d.m + "/" + d.d).join(", ") || "수업일 없음") + "</div>" +
     '<label for="crs-' + idx + "-" + si + '">과정<select id="crs-' + idx + "-" + si + '" data-i="' + idx + '" data-s="' + si + '">' + courseOptions(s.course) + "</select></label></div>").join("");
   return '<article class="panel" id="cls-' + idx + '" style="padding:16px">' +
     '<div class="cls-head"><h3>' + esc(c.names.join(", ") || "이름 없음") + "</h3>" + (state.example ? '<span class="tag">예시</span>' : '<span class="tag">' + esc(v.mLabel) + "</span>") + "</div>" +
@@ -311,7 +316,9 @@ document.getElementById("catalogList").innerHTML =
     return state.classes.map(c => ({ names: c.names.slice(), time: c.time, stages: c.segs.map(s => s.stage),
       courses: c.segs.map(s => (CATALOG.courses[s.course] || {}).full || s.stage),
       /* 수업일의 달(예: "2026-10"): 피드백 탭이 그 달 활동리포트를 골라요 */
-      months: c.segs.map(s => s.dates && s.dates[0] ? s.dates[0].y + "-" + String(s.dates[0].m).padStart(2, "0") : "") }));
+      months: c.segs.map(s => { const cr = CATALOG.courses[s.course], d0 = s.dates && s.dates[0];
+        const m = cr && cr.kind === "monthly" ? (cr.month || CATALOG.month) : (d0 ? d0.m : 0);   /* 계획안의 달(수업월호) */
+        return m ? (d0 ? d0.y : CATALOG.year) + "-" + String(m).padStart(2, "0") : ""; }) }));
   }
   handleFile = async function (f) {
     const r = await orig(f);

@@ -1,7 +1,7 @@
 /* 숙제 안내문 탭: 반 명단 + 숙제(화면에서 적거나 숙제 엑셀) → A4 가로 한 장에 두 개 들어가는 안내문(PDF·사진).
    흐름: 반 명단(rebuild) → 2단계 숙제 적기(hwEditorHTML) → 반마다 미리보기(cardHTML) → 저장(buildPdf / buildPngs)
    과정·필독서 자료는 data/catalog.js, 엑셀 읽기는 js/shared.js 에 있어요. */
-const { esc, norm, matchCourse, pickMonth, courseMonths, courseGroups, monthTag, readSheetRows, groupRows, tell, onParent } = Suite;
+const { esc, norm, matchCourse, readHo, pickMonth, courseMonths, courseGroups, monthTag, readSheetRows, groupRows, tell, onParent } = Suite;
 const CATALOG = window.CATALOG;
 const WD = "일월화수목금토";
 const SEG_COLORS = ["#1f2a4a", "#e07a3f"];  /* 두 과정을 번갈아 하는 반의 과정별 색 */
@@ -74,8 +74,11 @@ function resolveStage(stage, catalog, hwMap, month) {
 function buildClass(g, catalog, hwMap) {
   const segs = g.segs.map(s => {
     const dates = parseDates(s.dates, catalog.year, catalog.month);
-    const r = resolveStage(s.stage, catalog, hwMap, dates[0] && dates[0][1]);
-    return { stage: s.stage, datesText: s.dates, course: r.ci, guessed: !!r.guessed, dates };
+    /* 수업월호: "10월"이면 10월 계획안, "2호"면 단계에 호를 붙여요 */
+    const h = readHo(s.ho); let st = String(s.stage ?? "");
+    if (h.ho && !/\d\s*호?\s*$/.test(st.normalize("NFKC").trim())) st = st.trim() + h.ho + "호";
+    const r = resolveStage(st, catalog, hwMap, h.month || (dates[0] && dates[0][1]));
+    return { stage: s.stage, ho: s.ho || "", datesText: s.dates, course: r.ci, guessed: !!r.guessed, dates };
   });
   const hasHw = segs.some(s => s.course >= 0 && hwMap[s.course]);
   const guess = !g.count && g.team && g.names.length === 1; /* 팀 이름 한 줄인데 학생 수가 없어요 */
