@@ -443,15 +443,16 @@ hwEdit.addEventListener("input", e => {
     state.classes.forEach((cl, i) => { if (cl._dirty || cl.segs.some(s => s.course === ci)) { cl._dirty = false; redrawCard(i); } });
   }, 350);
 });
-/* 숙제 시트(1단계 '숙제 엑셀'에 그대로 다시 올릴 수 있는 모양): 단계·차시·필독서는 채워 두고, 적은 숙제도 같이 넣어요 */
+/* 숙제 시트(1단계 '숙제 엑셀'에 그대로 다시 올릴 수 있는 모양): 단계·차시는 채워 두고, 적은 숙제도 같이 넣어요 */
 function homeworkSheet(cis) {
-  const aoa = [["No", "단계", "차시", "필독서", "숙제"]];
+  /* 필독서는 넣지 않아요(계획안에서 자동으로 들어가요) */
+  const aoa = [["No", "단계", "차시", "숙제"]];
   cis.forEach((ci, k) => {
     const c = CATALOG.courses[ci], t = state.hwText[ci] || {};
-    c.sessions.forEach((s, i) => aoa.push([i ? "" : k + 1, i ? "" : c.name + monthTag(c, CATALOG), (i + 1) + "차시", s.book || "", t[i + 1] || ""]));
+    c.sessions.forEach((s, i) => aoa.push([i ? "" : k + 1, i ? "" : c.name + monthTag(c, CATALOG), (i + 1) + "차시", t[i + 1] || ""]));
   });
   const ws = XLSX.utils.aoa_to_sheet(aoa);
-  ws["!cols"] = [{ wch: 5 }, { wch: 18 }, { wch: 7 }, { wch: 30 }, { wch: 60 }];
+  ws["!cols"] = [{ wch: 5 }, { wch: 18 }, { wch: 7 }, { wch: 60 }];
   return ws;
 }
 const xlsxBlob = wb => new Blob([XLSX.write(wb, { bookType: "xlsx", type: "array" })], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
@@ -469,17 +470,17 @@ function blankHomeworkBook() {
 function savedHomeworkBook(on) {
   const cis = [...new Set([...rosterCourses(), ...Object.keys(state.hwText).map(Number)])]
     .filter(ci => CATALOG.courses[ci] && Object.values(state.hwText[ci] || {}).some(x => String(x || "").trim()));
-  const rows = [["반", "수업시간", "학생 수", "과정", "차시", "날짜", "요일", "필독서", "소주제", "숙제"]];
+  const rows = [["반", "수업시간", "학생 수", "과정", "차시", "날짜", "요일", "소주제", "숙제"]];
   on.forEach(c => {
     const v = viewOf(c), name = c.names.join(", ");
     v.rows.forEach(r => {
       const d = new Date(r.date[0], r.date[1] - 1, r.date[2]);
       rows.push([name, v.time || "", c.copies, r.short, r.no + "차시", r.date[0] + "-" + String(r.date[1]).padStart(2, "0") + "-" + String(r.date[2]).padStart(2, "0"), WD[d.getDay()],
-        r.book, r.tag || "", r.hw.map((h, i) => "①②③④⑤⑥⑦⑧⑨⑩"[i] + " " + h.t + h.notes.map(n => " (※ " + n + ")").join("")).join("  ")]);
+        r.tag || "", r.hw.map((h, i) => "①②③④⑤⑥⑦⑧⑨⑩"[i] + " " + h.t + h.notes.map(n => " (※ " + n + ")").join("")).join("  ")]);
     });
   });
   const byClass = XLSX.utils.aoa_to_sheet(rows);
-  byClass["!cols"] = [{ wch: 16 }, { wch: 18 }, { wch: 6 }, { wch: 14 }, { wch: 7 }, { wch: 11 }, { wch: 5 }, { wch: 28 }, { wch: 16 }, { wch: 70 }];
+  byClass["!cols"] = [{ wch: 16 }, { wch: 18 }, { wch: 6 }, { wch: 14 }, { wch: 7 }, { wch: 11 }, { wch: 5 }, { wch: 16 }, { wch: 70 }];
   byClass["!autofilter"] = { ref: byClass["!ref"] };
   const help = XLSX.utils.aoa_to_sheet([
     ["숙제 엑셀 쓰는 방법"], [""],
@@ -487,8 +488,8 @@ function savedHomeworkBook(on) {
     ["'숙제' 시트"], ["· 숙제 안내문 1단계 '숙제 엑셀' 칸에 이 파일을 그대로 올리면 적어 둔 숙제가 다시 들어와요."],
     ["· 다른 기기에서 쓰거나, 다음 달 같은 과정 숙제를 고쳐 쓸 때 숙제 칸만 바꿔서 올리세요."],
     ["· 숙제 칸에서 1. 2. 처럼 번호로 시작하는 줄이 숙제 한 개, 번호 없는 줄은 바로 위 숙제의 덧붙임 글이에요."],
-    ["· 첫 줄 제목(No·단계·차시·필독서·숙제)과 시트 순서는 바꾸지 마세요."], [""],
-    ["'반별 숙제' 시트"], ["· 저장할 때 체크한 반의 수업일마다 필독서·숙제를 한 줄씩 적었어요. 화면에서 고친 글자도 들어가 있어요."],
+    ["· 첫 줄 제목(No·단계·차시·숙제)과 시트 순서는 바꾸지 마세요. 필독서는 계획안에서 자동으로 들어가요."], [""],
+    ["'반별 숙제' 시트"], ["· 저장할 때 체크한 반의 수업일마다 숙제를 한 줄씩 적었어요. 화면에서 고친 글자도 들어가 있어요."],
     ["· 제목 줄의 ▼ 단추로 반·과정·날짜별로 골라 보거나, 출석부·학부모 안내에 복사해 쓰세요."],
   ]);
   help["!cols"] = [{ wch: 90 }];
