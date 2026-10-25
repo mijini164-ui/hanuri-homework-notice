@@ -10,7 +10,7 @@ const PAGES = {
   "homework.html": ["fileRoster", "fileHw", "hwEdit","blankXlsx", "list", "savePdf", "savePng", "saveXlsx", "saveStatus", "viewer"],
   "feedback.html": ["cls", "stage", "report", "common", "chips", "student", "checks", "memo", "gen", "alt", "text", "png", "copy", "all", "preview"],
 };
-const FORMS = ["반 명단 엑셀 (이름으로 적기).xlsx", "반 명단 엑셀 (팀 이름으로 적기).xlsx", "숙제 엑셀 (빈칸).xlsx", "한우리_수업도우미_사용안내.pptx", "한우리_수업도우미.html"];
+const FORMS = ["반 명단 엑셀 (이름으로 적기).xlsx", "반 명단 엑셀 (팀 이름으로 적기).xlsx", "숙제 엑셀 (빈칸).xlsx", "한우리_수업도우미_사용안내.pptx", "한우리_수업도우미.html", "수업도우미_이럴땐이렇게.pdf"];
 const errors = [];
 
 for (const [file, ids] of Object.entries(PAGES)) {
