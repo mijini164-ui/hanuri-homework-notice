@@ -29,7 +29,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: 올릴 파일 모으기
-        run: mkdir _site && cp index.html plan.html homework.html feedback.html _site/ && cp -r css js data covers forms _site/ && touch _site/.nojekyll && sed -i "s/__V__/${GITHUB_SHA::7}/g" _site/*.html
+        run: mkdir _site && cp index.html plan.html homework.html feedback.html consult.html _site/ && cp -r css js data covers forms _site/ && touch _site/.nojekyll && sed -i "s/__V__/${GITHUB_SHA::7}/g" _site/*.html
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:
