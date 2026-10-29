@@ -49,6 +49,8 @@ window.Suite = (function () {
   }
   /* 과정 이름 옆에 붙이는 달 표시(두 달 이상 들어 있을 때만): "독서리더1 (10월)" */
   function monthTag(c, catalog) { return c && c.kind === "monthly" && courseMonths(catalog).length > 1 ? " (" + (c.month || catalog.month) + "월)" : ""; }
+  /* 탭끼리 차시 순서를 맞출 때 쓰는 반·과정 이름표 */
+  function orderKey(names, seg) { return norm((names || []).join(",")) + "|" + norm(seg.stage) + "|" + norm(seg.datesText ?? seg.dates); }
   /* 차시 순서: "4,3,2,1" → 수업일마다 몇 차시인지 [4,3,2,1]. 비었거나 틀린 숫자는 남은 차시를 앞에서부터 채워요 */
   function sessionOrder(text, nDates, nSessions) {
     const want = (String(text ?? "").normalize("NFKC").match(/\d+/g) || []).map(Number);
@@ -164,5 +166,5 @@ window.Suite = (function () {
     if (e.source === parent && e.data && e.data.type === type) fn(e.data);
   });
 
-  return { esc, norm, cleanTime, parseDates, matchCourse, readHo, courseFor, sessionOrder, pickMonth, courseMonths, courseGroups, monthTag, readSheetRows, groupRows, tell, onParent };
+  return { esc, norm, cleanTime, parseDates, matchCourse, readHo, courseFor, sessionOrder, orderKey, pickMonth, courseMonths, courseGroups, monthTag, readSheetRows, groupRows, tell, onParent };
 })();

@@ -1,7 +1,7 @@
 /* 수업계획서 탭: 반 명단 엑셀 → 반마다 달력형 수업계획서 이미지(1200px)를 만들어요.
    흐름: 엑셀 올리기(handleFile) → 반 나누기(Suite.groupRows) → 반마다 화면(panelHTML) → 이미지(capture)
    과정·필독서 자료는 data/catalog.js, 엑셀 읽기는 js/shared.js 에 있어요. */
-const { esc, norm, parseDates, matchCourse, courseFor, sessionOrder, courseMonths, courseGroups, readSheetRows, groupRows, tell, onParent } = Suite;
+const { esc, norm, parseDates, matchCourse, courseFor, sessionOrder, orderKey, courseMonths, courseGroups, readSheetRows, groupRows, tell, onParent } = Suite;
 const CATALOG = window.CATALOG;
 const COLORS = ["#1f2a4a", "#e07a3f", "#2f8f6b"];  /* 두세 과정을 번갈아 하는 반의 과정별 색 */
 const WD = "일월화수목금토";
@@ -134,6 +134,7 @@ function openViewer(idx) {
 function closeViewer() { document.getElementById("viewer").hidden = true; document.body.style.overflow = ""; }
 
 const state = { classes: [], example: true };
+const ORD = {};   /* 화면에서 바꾼 차시 순서 (반·과정별) */
 
 function courseOptions(sel) {
   return '<option value="-1"' + (sel < 0 ? " selected" : "") + ">과정을 골라 주세요</option>" +
@@ -218,7 +219,7 @@ document.getElementById("classes").addEventListener("change", e => {
   if (t.dataset.o !== undefined) {   /* 차시 순서를 바꾸면 그 반만 다시 그려요 */
     const i = +t.dataset.o, c = state.classes[i], sg = c.segs[+t.dataset.s], v = t.value.trim();
     if (!sg || sg.order === v) return;
-    sg.order = v; c.blob = null;
+    sg.order = v; c.blob = null; ORD[orderKey(c.names, sg)] = v; tell({ type: "order", k: orderKey(c.names, sg), order: v });
     setTimeout(() => { document.getElementById("cls-" + i).outerHTML = panelHTML(c, i); refreshSaveButtons(); fit(i); }, 0); return;
   }
   const i = +t.dataset.i; if (Number.isNaN(i) || t.tagName !== "SELECT") return;
@@ -279,6 +280,7 @@ async function handleFile(f) {
     if (!groups.length) throw new Error("수업 정보가 있는 줄을 찾지 못했어요.");
     state.example = false;
     state.classes = groups.map(g => buildClass(g, CATALOG));
+    state.classes.forEach(c => c.segs.forEach(s => { const k = orderKey(c.names, s); if (k in ORD) s.order = ORD[k]; }));
     const miss = state.classes.filter(c => c.segs.some(s => s.course < 0)).length;
     const memoN = state.classes.filter(c => c.memo).length;
     st.textContent = state.classes.length + "개 반을 찾았어요." + (miss ? " 과정을 골라야 하는 반이 " + miss + "개 있어요." : "") +
@@ -344,6 +346,10 @@ document.getElementById("catalogList").innerHTML =
     try { await handleFile(new File([buf], name)); } finally { fromShell = false; }
   };
   onParent("roster", m => window.__receiveRoster(m.buf, m.name));
+  /* 숙제 안내문에서 바꾼 차시 순서를 받아요 */
+  onParent("order", m => { ORD[m.k] = m.order; state.classes.forEach((c, i) => { let hit = false;
+    c.segs.forEach(s => { if (orderKey(c.names, s) === m.k && s.order !== m.order) { s.order = m.order; hit = true; } });
+    if (hit) { c.blob = null; const el = document.getElementById("cls-" + i); if (el) { el.outerHTML = panelHTML(c, i); fit(i); } } }); refreshSaveButtons(); });
   /* 과정을 직접 고르면 피드백 탭에도 알려요 */
   document.getElementById("classes").addEventListener("change", () => setTimeout(() => {
     try { if (!state.example) tell({ type: "classes", classes: summary() }); } catch (e) {}

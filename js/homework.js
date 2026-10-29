@@ -1,7 +1,7 @@
 /* 숙제 안내문 탭: 반 명단 + 숙제(화면에서 적거나 숙제 엑셀) → A4 가로 한 장에 두 개 들어가는 안내문(PDF·사진).
    흐름: 반 명단(rebuild) → 2단계 숙제 적기(hwEditorHTML) → 반마다 미리보기(cardHTML) → 저장(buildPdf / buildPngs)
    과정·필독서 자료는 data/catalog.js, 엑셀 읽기는 js/shared.js 에 있어요. */
-const { esc, norm, matchCourse, readHo, sessionOrder, pickMonth, courseMonths, courseGroups, monthTag, readSheetRows, groupRows, tell, onParent } = Suite;
+const { esc, norm, matchCourse, readHo, sessionOrder, orderKey, pickMonth, courseMonths, courseGroups, monthTag, readSheetRows, groupRows, tell, onParent } = Suite;
 const CATALOG = window.CATALOG;
 const WD = "일월화수목금토";
 const SEG_COLORS = ["#1f2a4a", "#e07a3f"];  /* 두 과정을 번갈아 하는 반의 과정별 색 */
@@ -132,6 +132,7 @@ function classView(c, catalog, hwMap) {
 
 function titlePt(title) { const n = title.length; return n <= 14 ? 18 : n <= 18 ? 16 : n <= 24 ? 14 : 12; }
 
+const ORD = {};   /* 화면에서 바꾼 차시 순서 (반·과정별) */
 const state = { roster: null, hw: null, hwText: {}, hwUnknown: [], classes: [], example: true, hwIsExample: false };
 
 /* ---------- 숙제 바로 적기: 과정·차시마다 적은 글을 이 기기에 기억해요 ---------- */
@@ -375,6 +376,7 @@ function rebuild() {
     if (!groups.length) throw new Error("수업 정보가 있는 줄을 찾지 못했어요.");
     state.example = false;
     state.classes = groups.map(g => buildClass(g, CATALOG, state.hw || {}));
+    state.classes.forEach(c => c.segs.forEach(s => { const k = orderKey(c.names, s); if (k in ORD) s.order = ORD[k]; }));
     loadMemFor(rosterCourses()); syncInclude();
     const nHw = state.classes.filter(c => c.include).length, nNo = state.classes.length - nHw;
     let msg = state.classes.length + "개 반을 찾았어요.";
@@ -423,7 +425,7 @@ list.addEventListener("change", e => {
   if (t.dataset.inc !== undefined) { const c = state.classes[+t.dataset.inc]; c.include = t.checked; c.userOff = !t.checked; document.getElementById("cls-" + t.dataset.inc).classList.toggle("off", !t.checked); updateSummary(); return; }
   if (t.dataset.cp !== undefined) { const i = +t.dataset.cp; state.classes[i].copies = Math.max(1, Math.min(40, parseInt(t.value, 10) || 1)); state.classes[i].countGuess = false; redrawCard(i); return; }
   if (t.dataset.o !== undefined) { const i = +t.dataset.o, sg = state.classes[i].segs[+t.dataset.s], v = t.value.trim();
-    if (!sg || sg.order === v) return; sg.order = v; state.classes[i].ov = {}; setTimeout(() => redrawCard(i), 0); return; }
+    if (!sg || sg.order === v) return; sg.order = v; state.classes[i].ov = {}; ORD[orderKey(state.classes[i].names, sg)] = v; tell({ type: "order", k: orderKey(state.classes[i].names, sg), order: v }); setTimeout(() => redrawCard(i), 0); return; }
   if (t.tagName === "SELECT") { const i = +t.dataset.i, s = state.classes[i].segs[+t.dataset.s]; s.course = +t.value; s.guessed = false; state.classes[i].ov = {};
     loadMemFor([s.course]); syncInclude(); redrawCard(i); renderHwEditor(); }
 });
@@ -692,5 +694,9 @@ window.__state = state; window.__buildPdf = () => buildPdf(state.classes.filter(
     try { await handleFile(new File([buf], name), "roster"); } finally { fromShell = false; }
   };
   onParent("roster", m => window.__receiveRoster(m.buf, m.name));
+  /* 수업계획서에서 바꾼 차시 순서를 받아요 */
+  onParent("order", m => { ORD[m.k] = m.order; state.classes.forEach((c, i) => { let hit = false;
+    c.segs.forEach(s => { if (orderKey(c.names, s) === m.k && s.order !== m.order) { s.order = m.order; hit = true; } });
+    if (hit) { c.ov = {}; if (document.getElementById("cls-" + i)) redrawCard(i); } }); });
   tell({ type: "hello" });
 })();

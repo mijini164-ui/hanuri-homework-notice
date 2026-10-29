@@ -52,9 +52,12 @@ window.addEventListener("message", e => {
   if (!from || !m || typeof m !== "object") return;
   if (m.type === "roster" && m.buf) window.__shareRoster(m.buf, m.name, from);
   else if (m.type === "classes") window.__shareClasses(m.classes);
+  /* 차시 순서: 수업계획서에서 바꾸면 숙제 안내문에도, 숙제 안내문에서 바꾸면 수업계획서에도 전해요 */
+  else if (m.type === "order") { window.__orders = Object.assign(window.__orders || {}, { [m.k]: m.order }); ["plan", "homework"].forEach(t => { if (t !== from) post(t, m); }); }
   /* 늦게 열린 탭이 '이미 올린 명단 있나요?' 하고 물어요 */
   else if (m.type === "hello") {
     if (window.__roster) post(from, { type: "roster", buf: window.__roster.buf.slice(0), name: window.__roster.name });
     if (from === "feedback" && window.__rosterClasses) post(from, { type: "classes", classes: window.__rosterClasses });
+    Object.entries(window.__orders || {}).forEach(([k, order]) => post(from, { type: "order", k, order }));
   }
 });
