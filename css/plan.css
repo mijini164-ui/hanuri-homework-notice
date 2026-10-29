@@ -95,3 +95,8 @@ details summary{cursor:pointer;font-weight:700}
 .sheet .lnk{margin-top:12px;font-size:22px;color:#6b7590}
 .sheet .lnk b{color:#4a5878;margin-right:10px}
 .sheet .msg{margin-top:40px;background:#fff;border:2px solid #e3e7ee;border-radius:36px;padding:40px;text-align:center;font-size:34px;line-height:1.6}
+
+/* 차시 순서 칸: 과정 고르기 아래 한 줄 전체 */
+.seg .ordl{grid-column:1/-1}
+.seg .ordl small{font-weight:400}
+.seg .ordl input{font:inherit;font-size:14px;color:var(--fg);background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:7px 10px;width:100%;min-width:0}

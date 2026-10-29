@@ -1,7 +1,7 @@
 /* 숙제 안내문 탭: 반 명단 + 숙제(화면에서 적거나 숙제 엑셀) → A4 가로 한 장에 두 개 들어가는 안내문(PDF·사진).
    흐름: 반 명단(rebuild) → 2단계 숙제 적기(hwEditorHTML) → 반마다 미리보기(cardHTML) → 저장(buildPdf / buildPngs)
    과정·필독서 자료는 data/catalog.js, 엑셀 읽기는 js/shared.js 에 있어요. */
-const { esc, norm, matchCourse, readHo, pickMonth, courseMonths, courseGroups, monthTag, readSheetRows, groupRows, tell, onParent } = Suite;
+const { esc, norm, matchCourse, readHo, sessionOrder, pickMonth, courseMonths, courseGroups, monthTag, readSheetRows, groupRows, tell, onParent } = Suite;
 const CATALOG = window.CATALOG;
 const WD = "일월화수목금토";
 const SEG_COLORS = ["#1f2a4a", "#e07a3f"];  /* 두 과정을 번갈아 하는 반의 과정별 색 */
@@ -78,7 +78,7 @@ function buildClass(g, catalog, hwMap) {
     const h = readHo(s.ho); let st = String(s.stage ?? "");
     if (h.ho && !/\d\s*호?\s*$/.test(st.normalize("NFKC").trim())) st = st.trim() + h.ho + "호";
     const r = resolveStage(st, catalog, hwMap, h.month || (dates[0] && dates[0][1]));
-    return { stage: s.stage, ho: s.ho || "", datesText: s.dates, course: r.ci, guessed: !!r.guessed, dates };
+    return { stage: s.stage, ho: s.ho || "", order: s.order || "", datesText: s.dates, course: r.ci, guessed: !!r.guessed, dates };
   });
   const hasHw = segs.some(s => s.course >= 0 && hwMap[s.course]);
   const guess = !g.count && g.team && g.names.length === 1; /* 팀 이름 한 줄인데 학생 수가 없어요 */
@@ -92,11 +92,12 @@ function classView(c, catalog, hwMap) {
   const multi = hs.length > 1, rows = [];
   hs.forEach((s, si) => {
     const course = catalog.courses[s.course];
+    const ord = sessionOrder(s.order, s.dates.length, course ? course.sessions.length : s.dates.length);   /* 차시를 바꿔서 수업할 때 */
     s.dates.slice().sort((a, b) => (a[0] * 1e4 + a[1] * 100 + a[2]) - (b[0] * 1e4 + b[1] * 100 + b[2])).forEach((d, i) => {
-      const se = course && course.sessions[i];
-      rows.push({ date: d, seg: si, no: i + 1, short: course ? course.name : s.stage,
+      const no = ord[i], se = course && course.sessions[no - 1];
+      rows.push({ date: d, seg: si, no, short: course ? course.name : s.stage,
         tag: se ? se.tag : "", book: se ? se.book : "책 정보 없음",
-        hw: course && hwMap[s.course] ? (hwMap[s.course][i + 1] || []) : [] });
+        hw: course && hwMap[s.course] ? (hwMap[s.course][no] || []) : [] });
     });
   });
   rows.sort((a, b) => (a.date[0] * 1e4 + a.date[1] * 100 + a.date[2]) - (b.date[0] * 1e4 + b.date[1] * 100 + b.date[2]));
@@ -321,7 +322,8 @@ function cardHTML(c, idx) {
   if (c.k < 0.8) notes.push("내용이 많아서 글자를 조금 작게 넣었어요.");
   if (c.countGuess) warns.push("팀 이름으로 적혀 있어서 학생 수를 알 수 없어요. 오른쪽 '학생 수'를 바꿔 주세요. (엑셀에 '인원' 칸을 만들어 적으면 자동으로 맞춰요.)");
   const segs = c.segs.map((s, si) => '<div class="seg"><div class="dates"><b>' + esc(s.stage || "단계 없음") + "</b><br>" + (s.dates.map(d => d[1] + "/" + d[2]).join(", ") || "수업일 없음") + "</div>" +
-    '<label for="crs-' + idx + "-" + si + '">과정<select id="crs-' + idx + "-" + si + '" data-i="' + idx + '" data-s="' + si + '">' + courseOptions(s.course) + "</select></label></div>").join("");
+    '<label for="crs-' + idx + "-" + si + '">과정<select id="crs-' + idx + "-" + si + '" data-i="' + idx + '" data-s="' + si + '">' + courseOptions(s.course) + "</select></label>" +
+    '<label class="ordl" for="ord-' + idx + "-" + si + '">차시 순서 <small>(바꿔서 수업할 때만)</small><input type="text" inputmode="numeric" id="ord-' + idx + "-" + si + '" data-o="' + idx + '" data-s="' + si + '" value="' + esc(s.order || "") + '" placeholder="' + (s.dates.map((_, k) => k + 1).join(",") || "1,2,3,4") + '"></label></div>').join("");
   const pages = Math.ceil(c.copies / 2);
   if (!hasHw && !state.example) {
     c.include = false;
@@ -420,6 +422,8 @@ list.addEventListener("change", e => {
   const t = e.target;
   if (t.dataset.inc !== undefined) { const c = state.classes[+t.dataset.inc]; c.include = t.checked; c.userOff = !t.checked; document.getElementById("cls-" + t.dataset.inc).classList.toggle("off", !t.checked); updateSummary(); return; }
   if (t.dataset.cp !== undefined) { const i = +t.dataset.cp; state.classes[i].copies = Math.max(1, Math.min(40, parseInt(t.value, 10) || 1)); state.classes[i].countGuess = false; redrawCard(i); return; }
+  if (t.dataset.o !== undefined) { const i = +t.dataset.o, sg = state.classes[i].segs[+t.dataset.s], v = t.value.trim();
+    if (!sg || sg.order === v) return; sg.order = v; state.classes[i].ov = {}; setTimeout(() => redrawCard(i), 0); return; }
   if (t.tagName === "SELECT") { const i = +t.dataset.i, s = state.classes[i].segs[+t.dataset.s]; s.course = +t.value; s.guessed = false; state.classes[i].ov = {};
     loadMemFor([s.course]); syncInclude(); redrawCard(i); renderHwEditor(); }
 });

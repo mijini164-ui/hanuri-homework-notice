@@ -129,3 +129,8 @@ button.ghost{background:transparent;color:var(--fg);border-color:var(--line)}
 @media (max-width:560px){.hwr{grid-template-columns:1fr}}
 
 .pill.print{background:#1f2a4a;color:#fff;font-weight:700}
+
+/* 차시 순서 칸: 과정 고르기 아래 한 줄 전체 */
+.seg .ordl{grid-column:1/-1}
+.seg .ordl small{font-weight:400}
+.seg .ordl input{font:inherit;font-size:14px;color:var(--fg);background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:7px 10px;width:100%;min-width:0}

@@ -49,6 +49,15 @@ window.Suite = (function () {
   }
   /* 과정 이름 옆에 붙이는 달 표시(두 달 이상 들어 있을 때만): "독서리더1 (10월)" */
   function monthTag(c, catalog) { return c && c.kind === "monthly" && courseMonths(catalog).length > 1 ? " (" + (c.month || catalog.month) + "월)" : ""; }
+  /* 차시 순서: "4,3,2,1" → 수업일마다 몇 차시인지 [4,3,2,1]. 비었거나 틀린 숫자는 남은 차시를 앞에서부터 채워요 */
+  function sessionOrder(text, nDates, nSessions) {
+    const want = (String(text ?? "").normalize("NFKC").match(/\d+/g) || []).map(Number);
+    const out = [], used = new Set();
+    for (let i = 0; i < nDates; i++) { const v = want[i]; if (v >= 1 && v <= Math.max(nSessions, nDates) && !used.has(v)) { out.push(v); used.add(v); } else out.push(0); }
+    let next = 1;
+    for (let i = 0; i < nDates; i++) if (!out[i]) { while (used.has(next)) next++; out[i] = next; used.add(next); }
+    return out;
+  }
   /* 수업월호 칸 읽기: "10월" → {month:10}, "2호" → {ho:2} */
   function readHo(t) {
     const x = String(t ?? "").normalize("NFKC"), m = x.match(/(\d{1,2})\s*월/), h = x.match(/(\d{1,2})\s*호/);
@@ -104,6 +113,8 @@ window.Suite = (function () {
     const cNo = col("no"), cTeam = col("팀여부"), cName = col("이름"), cTime = col("수업요일"), cStage = col("단계"), cDate = col("수업일");
     /* 수업월호 칸(선택): "10월"이면 수업일이 11월이어도 10월 계획안, "2호"면 그 호 */
     const cHo = ["수업월호", "월호", "수업월", "계획안", "수업호"].map(k => H.indexOf(k)).find(i => i >= 0) ?? -1;
+    /* 차시순서 칸(선택): "4,3,2,1"처럼 차시를 바꿔서 수업할 때 */
+    const cOrd = ["차시순서", "수업순서", "차시"].map(k => H.indexOf(k)).find(i => i >= 0) ?? -1;
     const cMemo = ["특이사항", "특이", "비고", "인사말", "메모", "전달사항", "참고사항", "기타"].map(col).find(i => i >= 0) ?? -1;
     /* 팀 이름으로 적을 때 쓰는 학생 수 칸(인원·학생수·명수) */
     const cCount = H.findIndex(h => h === "인원" || h.startsWith("인원") || h.startsWith("학생수") || h === "명수");
@@ -138,7 +149,8 @@ window.Suite = (function () {
       if (stage || dates) {
         const ho = cHo >= 0 ? String(r[cHo] ?? "").trim() : "";
         const key = norm(stage) + "|" + norm(dates) + "|" + norm(ho);
-        if (!cur.segs.some(s => s.key === key)) cur.segs.push({ key, stage, dates, ho });
+        const order = cOrd >= 0 ? String(r[cOrd] ?? "").trim() : "";
+        if (!cur.segs.some(s => s.key === key)) cur.segs.push({ key, stage, dates, ho, order });
       }
     }
     const out = groups.filter(g => g.segs.length);
@@ -152,5 +164,5 @@ window.Suite = (function () {
     if (e.source === parent && e.data && e.data.type === type) fn(e.data);
   });
 
-  return { esc, norm, cleanTime, parseDates, matchCourse, readHo, courseFor, pickMonth, courseMonths, courseGroups, monthTag, readSheetRows, groupRows, tell, onParent };
+  return { esc, norm, cleanTime, parseDates, matchCourse, readHo, courseFor, sessionOrder, pickMonth, courseMonths, courseGroups, monthTag, readSheetRows, groupRows, tell, onParent };
 })();
