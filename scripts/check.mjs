@@ -8,7 +8,6 @@ const PAGES = {
   "index.html": ["tab-plan", "tab-homework", "tab-feedback", "f-plan", "f-homework", "f-feedback", "forms"],
   "plan.html": ["file", "classes", "catalogList", "viewer"],
   "homework.html": ["fileRoster", "fileHw", "hwEdit","blankXlsx", "list", "savePdf", "savePng", "saveXlsx", "saveStatus", "viewer"],
-  "consult.html": ["form", "pages", "page1", "page2", "page3", "savePdf", "savePng", "print", "points", "slots", "ptsOut", "slotsOut", "viewer"],
   "feedback.html": ["cls", "stage", "report", "common", "chips", "student", "checks", "memo", "gen", "alt", "text", "png", "copy", "all", "preview"],
 };
 const FORMS = ["반 명단 엑셀 (이름으로 적기).xlsx", "반 명단 엑셀 (팀 이름으로 적기).xlsx", "숙제 엑셀 (빈칸).xlsx", "한우리_수업도우미_사용안내.pptx", "한우리_수업도우미.html", "수업도우미_이럴땐이렇게.pdf"];
