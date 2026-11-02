@@ -1,4 +1,4 @@
-name: 점검 후 GitHub Pages에 올리기
+name: 새 주소로 넘겨주는 페이지 올리기
 on:
   push:
     branches: [main]
@@ -7,29 +7,15 @@ permissions:
   contents: read
   pages: write
   id-token: write
-concurrency:
-  group: pages
-  cancel-in-progress: true
 jobs:
-  check:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-      - name: 페이지 점검
-        run: node scripts/check.mjs
   deploy:
-    needs: check
     runs-on: ubuntu-latest
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - uses: actions/checkout@v4
-      - name: 올릴 파일 모으기
-        run: mkdir _site && cp index.html plan.html homework.html feedback.html _site/ && cp -r css js data covers forms _site/ && touch _site/.nojekyll && sed -i "s/__V__/${GITHUB_SHA::7}/g" _site/*.html
+      - run: mkdir _site && cp index.html 404.html _site/ && touch _site/.nojekyll
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:
