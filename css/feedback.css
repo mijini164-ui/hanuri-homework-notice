@@ -77,6 +77,7 @@ details.more .inner{display:flex;flex-direction:column;gap:10px}
 .rp .top{display:flex;justify-content:space-between;align-items:flex-end;border-bottom:3px solid #2b2622;padding-bottom:16px;margin-bottom:22px}
 .rp .lv{font-size:17px;font-weight:700;color:#e2583e;letter-spacing:.5px}
 .rp h3{font-size:38px;font-weight:900;line-height:1.15;margin:4px 0 0}
+.rp .sub{margin:6px 0 0;font-size:20px;font-weight:700;color:#e07a3f}
 .rp .mon{text-align:right;font-size:15px;color:#6d625a;line-height:1.5}
 .rp .mon b{display:block;font-size:30px;color:#2b2622;font-weight:900}
 .rp .card{display:flex;gap:18px;background:#fff;border-radius:16px;padding:16px;margin-bottom:14px;box-shadow:0 2px 0 #e6dccf}

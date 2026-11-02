@@ -62,7 +62,7 @@ function buildChecks(){
 }
 function paintChecks(){const d=stuData(cur.name);document.querySelectorAll('#checks button[data-i]').forEach(b=>b.setAttribute('aria-pressed',d.checks[b.dataset.i]===b.dataset.l?'true':'false'))}
 
-/* 리포트 이미지 HTML */
+/* 리포트 이미지 HTML — 수업 전·후 모두 보낼 수 있게 제목은 '읽고 생각하는 시간', 아래 'N월 수업 이야기'(달은 활동리포트의 달로 자동) */
 /* 차시 하나만 고르면 그 차시 카드와 그날 피드백만 들어가요 */
 function fillScope(){
   const r=curReport(), prev=$('scope').value;
@@ -80,7 +80,7 @@ function reportHTML(r,student,text){
     ${(s.competencies||[]).map(c=>`<span class="chip"># ${esc(c)}</span>`).join('')}
     ${s.curriculum?`<div class="meta">교과 연계 · ${esc(s.curriculum)}</div>`:''}</div></div>`).join('');
   const fb=!String(text||'').trim()?'':`<div class="fb"><h4>${m?m+'월':'이번 달'}${r._one?' '+esc(r._one)+'차시':''} 수업 모습</h4><p class="msg">${esc(text)}</p></div>`;
-  return `<div class="rp"><div class="top"><div><div class="lv">${esc(r.stageLabel||r.stage)}</div><h3>${r._one?'이런 수업을':'이번 달 이런 수업을'}<br>했어요</h3></div><div class="mon"><b>${esc(r.period||(m+'월'))}${r._one?' · '+esc(r._one)+'차시':''}</b>${r.source==='수업계획안'?'수업 이야기':'활동리포트'}</div></div>${cards}${fb}</div>`;
+  return `<div class="rp"><div class="top"><div><div class="lv">${esc(r.stageLabel||r.stage)}</div><h3>읽고 생각하는 시간</h3><p class="sub">${esc(r.period||(m?m+'월':'이번 달'))}${r._one?' '+esc(r._one)+'차시':''} 수업 이야기</p></div><div class="mon"><b>${esc(r.period||(m+'월'))}</b>${r._one?esc(r._one)+'차시':''}</div></div>${cards}${fb}</div>`;
 }
 function coverSrc(s){return s.coverId?'covers/a_'+s.coverId+'.jpg':(s.cover?'covers/'+s.cover:'')}
 const CATS=['정규과정','몰입독서','초등특강','통사 특강','중등특강'];
